@@ -38,6 +38,8 @@ class SnookerOrgRepository {
 class Match(private val data: MatchData) {
     suspend fun player1() = repository.player(data.Player1ID)
     suspend fun player2() = repository.player(data.Player2ID)
+    val round: String
+        get() = "Round ${data.Round}"
     val date: Date
         get() = data.ScheduledDate
 }

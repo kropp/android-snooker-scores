@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         matches_list.layoutManager = LinearLayoutManager(this)
 
         launch(UI) {
-            matchesListAdapter.matches = repository.matches()
+            matchesListAdapter.setMatches(repository.matches())
             matchesListAdapter.notifyDataSetChanged()
         }
     }
