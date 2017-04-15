@@ -6,12 +6,12 @@ import android.support.v7.widget.LinearLayoutManager
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
-import org.snooker.api.SnookerOrgRepository
-
-val repository = SnookerOrgRepository()
 
 class MainActivity : AppCompatActivity() {
     private val matchesListAdapter = MatchesListAdapter(this)
+
+    val application: SnookerApplication
+        get() = getApplication() as SnookerApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         matches_list.layoutManager = LinearLayoutManager(this)
 
         launch(UI) {
-            matchesListAdapter.setMatches(repository.matches())
+            matchesListAdapter.setMatches(application.repository.matches())
             matchesListAdapter.notifyDataSetChanged()
         }
     }
