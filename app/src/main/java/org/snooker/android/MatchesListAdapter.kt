@@ -1,6 +1,5 @@
 package org.snooker.android
 
-import android.content.Context
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateFormat
 import android.view.LayoutInflater
@@ -9,13 +8,15 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.snooker.api.Match
 
-class MatchesListAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val MATCH = 1001
     val ROUND = 1002
 
-    private var matchesByRound = sortedMapOf<String,List<Match>>()
+    private var matchesByRound = sortedMapOf<Long,List<Match>>()
+    private var rounds = mapOf<Long,String>()
 
-    fun setMatches(matches: List<Match>) {
+    fun setMatches(matches: List<Match>, rounds: Map<Long,String>) {
+        this.rounds = rounds
         matchesByRound = matches.groupBy { it.round }.toSortedMap()
     }
 
@@ -24,11 +25,16 @@ class MatchesListAdapter(private val context: Context) : RecyclerView.Adapter<Re
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (holder is MatchViewHolder) {
             val match = matchAt(position)!!
+            holder.match = match
 
             holder.view.setBackgroundResource(if (position % 2 == 0) R.color.colorPrimaryDark else R.color.colorPrimary)
             holder.first.text = ""
             holder.second.text = ""
-            holder.auxiliary.text = DateFormat.getDateFormat(holder.view.context).format(match.date)
+            if (match.score1 + match.score2 > 0) {
+                holder.auxiliary.text = "${match.score1}\n${match.score2}"
+            } else {
+                holder.auxiliary.text = DateFormat.getDateFormat(holder.view.context).format(match.date)
+            }
 
             if (holder.job?.isActive == true) {
                 holder.job!!.cancel()
@@ -73,7 +79,7 @@ class MatchesListAdapter(private val context: Context) : RecyclerView.Adapter<Re
         var pos = position
         for ((key, value) in matchesByRound) {
             if (pos == 0) {
-                return key
+                return rounds[key]
             }
             pos -= (value.size + 1)
         }
@@ -81,7 +87,7 @@ class MatchesListAdapter(private val context: Context) : RecyclerView.Adapter<Re
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = if (viewType == MATCH)
-            MatchViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
+            MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
         else
-            RoundViewHolder(LayoutInflater.from(parent.context).inflate(android.R.layout.simple_list_item_1, parent, false))
+            RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
 }
