@@ -12,4 +12,7 @@ interface SnookerOrgApi {
 
     @GET("/")
     fun player(@Query("p") playerId: Long): Call<List<PlayerData>>
+
+    @GET("/")
+    fun match(id: Long): Call<Match>
 }

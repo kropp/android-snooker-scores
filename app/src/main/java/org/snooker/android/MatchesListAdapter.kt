@@ -1,10 +1,17 @@
 package org.snooker.android
 
+import android.graphics.Typeface
+import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
+import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.format.DateFormat
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import org.snooker.api.Match
 
@@ -17,7 +24,10 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
 
     fun setMatches(matches: List<Match>, rounds: Map<Long,String>) {
         this.rounds = rounds
-        matchesByRound = matches.groupBy { it.round }.toSortedMap()
+        matchesByRound = matches
+                .groupBy { it.round }
+                .map { it.key to it.value.sortedBy { if (it.isActive) -100000+it.number else if (it.isStarted) -10000+it.number else if (it.isFinished) 100000-it.number else it.number } }
+                .toMap().toSortedMap()
     }
 
     override fun getItemCount() = matchesByRound.values.sumBy { it.size + 1 }
@@ -28,9 +38,9 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
             holder.match = match
 
             holder.view.setBackgroundResource(if (position % 2 == 0) R.color.colorPrimaryDark else R.color.colorPrimary)
-            holder.first.text = ""
-            holder.second.text = ""
-            if (match.score1 + match.score2 > 0) {
+            holder.auxiliary.setTextColor(ContextCompat.getColor(holder.view.context, if (match.isActive) R.color.colorAccent else R.color.textColor))
+
+            if (match.isStarted || match.isFinished) {
                 holder.auxiliary.text = "${match.score1}\n${match.score2}"
             } else {
                 holder.auxiliary.text = DateFormat.getDateFormat(holder.view.context).format(match.date)
@@ -40,12 +50,20 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
                 holder.job!!.cancel()
             }
             holder.job = launch(UI) {
-                holder.first.text = match.player1().name
-                holder.second.text = match.player2().name
+                val player1 = async(CommonPool) { match.player1() }
+                val player2 = async(CommonPool) { match.player2() }
+
+                holder.first.text = playerName(player1.await().name, match.isPlayer1Winner)
+                holder.second.text = playerName(player2.await().name, match.isPlayer2Winner)
             }
         } else if (holder is RoundViewHolder) {
-            holder.view.setBackgroundResource(R.color.colorPrimaryDark)
             holder.text.text = roundAt(position)
+        }
+    }
+
+    private fun playerName(name: String, bold: Boolean) = SpannableString(name).apply {
+        if (bold) {
+            setSpan(StyleSpan(Typeface.BOLD), 0, name.length, 0)
         }
     }
 
