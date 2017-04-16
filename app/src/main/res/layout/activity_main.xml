@@ -1,54 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/colorPrimaryDark"
-    android:orientation="vertical">
-    <TextView
-        android:id="@+id/event_name"
-        android:textSize="@dimen/textHeaderSize"
-        android:textColor="@color/textColor"
-        android:padding="@dimen/padding"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:fitsSystemWindows="true">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="@dimen/padding"
-        android:paddingEnd="@dimen/padding"
-        android:paddingBottom="@dimen/padding"
-        android:baselineAligned="true"
-        android:orientation="horizontal">
-        <TextView
-            android:id="@+id/event_location"
-            android:textSize="@dimen/textSmallSize"
-            android:textColor="@color/textColor"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-        <android.support.v7.widget.AppCompatImageView
-            android:id="@+id/event_location_flag"
-            android:layout_marginStart="@dimen/padding"
-            android:layout_marginEnd="@dimen/padding"
-            android:baselineAlignBottom="true"
-            android:layout_width="@dimen/flagSmallWidth"
-            android:layout_height="@dimen/flagSmallHeight" />
-    </LinearLayout>
-    <TextView
-        android:id="@+id/event_dates"
-        android:textSize="@dimen/textSmallSize"
-        android:textColor="@color/textColor"
-        android:paddingStart="@dimen/padding"
-        android:paddingEnd="@dimen/padding"
-        android:paddingBottom="@dimen/padding"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
-
-    <android.support.v4.widget.SwipeRefreshLayout xmlns:tools="http://schemas.android.com/tools"
+    <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/swipe"
+        android:background="@color/colorPrimaryDark"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context="org.snooker.android.MainActivity">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
 
         <android.support.v7.widget.RecyclerView
             android:id="@+id/matches_list"
@@ -56,4 +19,76 @@
             android:layout_height="match_parent" />
 
     </android.support.v4.widget.SwipeRefreshLayout>
-</LinearLayout>
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/app_bar_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme"
+        >
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:id="@+id/collapsing_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:contentScrim="?attr/colorPrimaryDark"
+            app:expandedTitleMarginStart="@dimen/padding"
+            app:expandedTitleMarginEnd="@dimen/padding"
+            app:expandedTitleGravity="top"
+            app:expandedTitleTextAppearance="@color/textColor"
+            app:collapsedTitleTextAppearance="@color/textColor"
+            >
+
+            <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/colorPrimaryDark"
+                android:paddingTop="@dimen/expandedEventHeaderHeight"
+                android:paddingStart="@dimen/padding"
+                android:paddingEnd="@dimen/padding"
+                android:paddingBottom="@dimen/padding"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="@dimen/padding"
+                    android:baselineAligned="true"
+                    android:orientation="horizontal">
+                    <TextView
+                        android:id="@+id/event_location"
+                        android:textSize="@dimen/textSmallSize"
+                        android:textColor="@color/textColor"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content" />
+                    <android.support.v7.widget.AppCompatImageView
+                        android:id="@+id/event_location_flag"
+                        android:layout_marginStart="@dimen/padding"
+                        android:layout_marginEnd="@dimen/padding"
+                        android:baselineAlignBottom="true"
+                        android:layout_width="@dimen/flagSmallWidth"
+                        android:layout_height="@dimen/flagSmallHeight" />
+                </LinearLayout>
+                <TextView
+                    android:id="@+id/event_dates"
+                    android:textSize="@dimen/textSmallSize"
+                    android:textColor="@color/textColor"
+                    android:paddingTop="@dimen/padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:titleTextColor="@color/textColor"
+                android:subtitleTextColor="@color/textColor"
+                app:layout_collapseMode="pin" />
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+</android.support.design.widget.CoordinatorLayout>

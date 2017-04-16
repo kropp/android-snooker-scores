@@ -9,4 +9,5 @@
     <dimen name="textSmallSize">16sp</dimen>
     <dimen name="flagSmallHeight">12sp</dimen>
     <dimen name="flagSmallWidth">16sp</dimen>
+    <dimen name="expandedEventHeaderHeight">68dp</dimen>
 </resources>

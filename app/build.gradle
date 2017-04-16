@@ -65,6 +65,7 @@ dependencies {
     compile 'com.android.support:appcompat-v7:25.3.1'
     compile 'com.android.support:recyclerview-v7:25.3.1'
     compile 'com.android.support.constraint:constraint-layout:1.0.0-alpha2'
+    compile 'com.android.support:design:25.3.1'
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.2.0'
     compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7'

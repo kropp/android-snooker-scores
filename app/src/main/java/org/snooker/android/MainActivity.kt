@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_match.view.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import org.snooker.api.Event
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
 
         update()
 
+        swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark, R.color.colorPrimaryLight)
         swipe.setOnRefreshListener {
             update()
         }
@@ -38,10 +40,13 @@ class MainActivity : AppCompatActivity() {
         launch(UI) {
             val event = application.repository.event(536)
 
-            event_name.text = event.name
+//            event_name.text = event.name
             event_location.text = event.location
             event_location_flag.setImageResource(flagResource(event.country))
             event_dates.text = "${longDateFormat.format(event.startDate)} — ${longDateFormat.format(event.endDate)}"
+
+            toolbar.title = event.name
+            toolbar.subtitle = event.location
 
             this@MainActivity.event = event
 
