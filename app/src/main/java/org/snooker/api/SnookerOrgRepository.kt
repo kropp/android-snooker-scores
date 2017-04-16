@@ -2,8 +2,8 @@ package org.snooker.api
 
 import android.content.ContentValues
 import android.content.Context
-import android.util.Log
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import android.icu.text.SimpleDateFormat
+import android.text.format.DateFormat
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
@@ -11,6 +11,7 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import org.snooker.android.YMDDateFormat
 import org.snooker.db.SnookerOrgDbHelper
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
@@ -38,19 +39,37 @@ class SnookerOrgRepository(context: Context) {
         retrofit.create(SnookerOrgApi::class.java)
     }
 
+    suspend fun event(id: Long): Event {
+        val data = service.event(id)
+        val matches = matches(id)
+        val rounds = rounds(id)
+        return Event(data.await().first(), matches.await(), rounds.await(), this)
+    }
+
     suspend fun match(id: Long) = service.match(id).await()//.map { Match(it, this) }.sortedBy { it.date }
 
-    suspend fun matches() = service.matchesOfEvent(536).await().map { Match(it, this) }.sortedBy { it.date }
+    fun matches(id: Long) = async(CommonPool) {
+        service.matchesOfEvent(id).await().map {
+            val player1 = player(it.Player1ID)
+            val player2 = player(it.Player2ID)
+            Match(it, player1.await(), player2.await(), this@SnookerOrgRepository)
+        }
+    }
 
-    suspend fun rounds() = service.roundsOfEvent(536).await().associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" }
+    fun rounds(id: Long) = async(CommonPool) {
+        service.roundsOfEvent(id).await().associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" }
+    }
 
-    suspend fun player(id: Long): Player {
+    fun player(id: Long) = async(CommonPool) {
         val cursor = db.query(SnookerOrgDbHelper.TABLE_PLAYERS, SnookerOrgDbHelper.COLUMN_PLAYERS, "ID = ?", arrayOf(id.toString()), null, null, null)
         if (cursor.count == 1) {
             cursor.moveToNext()
+            val json = cursor.getString(1)
+            cursor.close()
 
-            return objectMapper.readValue<Player>(cursor.getString(1), Player::class.java)
+            objectMapper.readValue<Player>(json, Player::class.java)
         } else {
+            cursor.close()
 
             val playerData = service.player(id).await().first()
             val json = objectMapper.writeValueAsString(playerData)
@@ -59,16 +78,22 @@ class SnookerOrgRepository(context: Context) {
             values.put("json", json)
             db.insert(SnookerOrgDbHelper.TABLE_PLAYERS, null, values)
 
-            return Player(playerData)
+            Player(playerData)
         }
     }
 }
 
-class Match(private val data: MatchData, private val repository: SnookerOrgRepository) {
+class Event(private val data: EventData, val matches: List<Match>, val rounds: Map<Long,String>, private val repository: SnookerOrgRepository) {
+    val name: String get() = data.Name
+    val location: String get() = "${data.Venue} · ${data.City}, ${data.Country}"
+    val country: String get() = data.Country
+    val startDate: Date get() = YMDDateFormat.parse(data.StartDate)
+    val endDate: Date get() = YMDDateFormat.parse(data.EndDate)
+}
+
+class Match(private val data: MatchData, val player1: Player, val player2: Player, private val repository: SnookerOrgRepository) {
     val id get() = data.ID
     val number get() = data.Number
-    suspend fun player1() = repository.player(data.Player1ID)
-    suspend fun player2() = repository.player(data.Player2ID)
     val score1 get() = data.Score1
     val score2 get() = data.Score2
     val round get() = data.Round
@@ -98,13 +123,3 @@ class Player(private val data: PlayerData) {
     val nationality: String get() = data.Nationality
 }
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-data class PlayerData(
-    val ID: Long,
-    val FirstName: String,
-    val MiddleName: String,
-    val LastName: String,
-    val ShortName: String,
-    val SurnameFirst: Boolean,
-    val Nationality: String
-)

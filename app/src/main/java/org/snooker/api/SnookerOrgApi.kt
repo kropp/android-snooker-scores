@@ -5,6 +5,9 @@ import retrofit2.Call
 
 interface SnookerOrgApi {
     @GET("/")
+    fun event(@Query("e") eventId: Long): Call<List<EventData>>
+
+    @GET("/")
     fun matchesOfEvent(@Query("e") eventId: Long , @Query("t") requestType: String = "6"): Call<List<MatchData>>
 
     @GET("/")

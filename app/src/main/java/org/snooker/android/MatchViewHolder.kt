@@ -16,7 +16,6 @@ class MatchViewHolder(val activity: MainActivity, val view: View): RecyclerView.
     val text2 = view.findViewById(android.R.id.text2) as TextView
     val aux2 = view.findViewById(R.id.aux2) as TextView
 
-    var job: Job? = null
     var match: Match? = null
 
     init {
