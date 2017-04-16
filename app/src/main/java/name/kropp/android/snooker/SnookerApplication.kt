@@ -1,7 +1,7 @@
-package org.snooker.android
+package name.kropp.android.snooker
 
 import android.app.Application
-import org.snooker.api.SnookerOrgRepository
+import name.kropp.android.snooker.api.SnookerOrgRepository
 
 
 class SnookerApplication : Application() {

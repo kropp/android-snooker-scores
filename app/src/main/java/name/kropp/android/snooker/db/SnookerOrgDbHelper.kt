@@ -1,4 +1,4 @@
-package org.snooker.db
+package name.kropp.android.snooker.db
 
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
@@ -13,10 +13,10 @@ class SnookerOrgDbHelper(context: Context) : SQLiteOpenHelper(context, FILENAME,
         val COLUMN_PLAYERS = arrayOf("id", "json")
     }
 
-    override fun onCreate(db: SQLiteDatabase) = db.execSQL("CREATE TABLE $TABLE_PLAYERS (id INTEGER PRIMARY KEY, json TEXT)")
+    override fun onCreate(db: SQLiteDatabase) = db.execSQL("CREATE TABLE ${TABLE_PLAYERS} (id INTEGER PRIMARY KEY, json TEXT)")
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        db.execSQL("DROP TABLE IF EXISTS $TABLE_PLAYERS")
+        db.execSQL("DROP TABLE IF EXISTS ${TABLE_PLAYERS}")
         onCreate(db)
     }
     override fun onDowngrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) = onUpgrade(db, oldVersion, newVersion)

@@ -1,4 +1,4 @@
-package org.snooker.android
+package name.kropp.android.snooker
 
 import java.text.SimpleDateFormat
 

@@ -1,4 +1,4 @@
-package org.snooker.api
+package name.kropp.android.snooker.api
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 

@@ -1,11 +1,10 @@
-package org.snooker.android
+package name.kropp.android.snooker
 
 import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.TextView
-import kotlinx.coroutines.experimental.Job
-import org.snooker.api.Match
+import name.kropp.android.snooker.api.Match
 
 class MatchViewHolder(val activity: MainActivity, val view: View): RecyclerView.ViewHolder(view) {
     val flag1 = view.findViewById(R.id.flag1) as AppCompatImageView

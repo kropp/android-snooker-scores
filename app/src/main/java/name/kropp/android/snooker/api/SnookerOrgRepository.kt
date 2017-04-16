@@ -1,18 +1,15 @@
-package org.snooker.api
+package name.kropp.android.snooker.api
 
 import android.content.ContentValues
 import android.content.Context
-import android.icu.text.SimpleDateFormat
-import android.text.format.DateFormat
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
-import org.snooker.android.YMDDateFormat
-import org.snooker.db.SnookerOrgDbHelper
+import name.kropp.android.snooker.YMDDateFormat
+import name.kropp.android.snooker.db.SnookerOrgDbHelper
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.util.*
@@ -61,7 +58,7 @@ class SnookerOrgRepository(context: Context) {
     }
 
     fun player(id: Long) = async(CommonPool) {
-        val cursor = db.query(SnookerOrgDbHelper.TABLE_PLAYERS, SnookerOrgDbHelper.COLUMN_PLAYERS, "ID = ?", arrayOf(id.toString()), null, null, null)
+        val cursor = db.query(SnookerOrgDbHelper.Companion.TABLE_PLAYERS, SnookerOrgDbHelper.Companion.COLUMN_PLAYERS, "ID = ?", arrayOf(id.toString()), null, null, null)
         if (cursor.count == 1) {
             cursor.moveToNext()
             val json = cursor.getString(1)
@@ -76,7 +73,7 @@ class SnookerOrgRepository(context: Context) {
             val values = ContentValues()
             values.put("id", playerData.ID)
             values.put("json", json)
-            db.insert(SnookerOrgDbHelper.TABLE_PLAYERS, null, values)
+            db.insert(SnookerOrgDbHelper.Companion.TABLE_PLAYERS, null, values)
 
             Player(playerData)
         }

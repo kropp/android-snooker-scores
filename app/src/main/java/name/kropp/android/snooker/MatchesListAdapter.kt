@@ -1,4 +1,4 @@
-package org.snooker.android
+package name.kropp.android.snooker
 
 import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
@@ -8,13 +8,8 @@ import android.text.format.DateFormat
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.launch
-import org.snooker.api.Event
-import org.snooker.api.Match
-import org.snooker.api.Player
+import name.kropp.android.snooker.api.Event
+import name.kropp.android.snooker.api.Match
 
 class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     val MATCH = 1001
