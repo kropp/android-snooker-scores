@@ -10,8 +10,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import name.kropp.android.snooker.api.Event
 import name.kropp.android.snooker.api.Match
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private val dateFormat = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd"), Locale.getDefault())
     val MATCH = 1001
     val ROUND = 1002
 
@@ -41,7 +44,7 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
                 holder.aux1.text = playerName(match.score1.toString(), match.isPlayer1Winner)
                 holder.aux2.text = playerName(match.score2.toString(), match.isPlayer2Winner)
             } else {
-                holder.aux1.text = DateFormat.getDateFormat(holder.view.context).format(match.date)
+                holder.aux1.text = dateFormat.format(match.date)
                 holder.aux2.text = ""
             }
 

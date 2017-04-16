@@ -36,12 +36,7 @@ class SnookerOrgRepository(context: Context) {
         retrofit.create(SnookerOrgApi::class.java)
     }
 
-    suspend fun event(id: Long): Event {
-        val data = service.event(id)
-        val matches = matches(id)
-        val rounds = rounds(id)
-        return Event(data.await().first(), matches.await(), rounds.await(), this)
-    }
+    suspend fun event(id: Long) = Event(service.event(id).await().first(), this)
 
     suspend fun match(id: Long) = service.match(id).await()//.map { Match(it, this) }.sortedBy { it.date }
 
@@ -80,7 +75,17 @@ class SnookerOrgRepository(context: Context) {
     }
 }
 
-class Event(private val data: EventData, val matches: List<Match>, val rounds: Map<Long,String>, private val repository: SnookerOrgRepository) {
+class Event(private val data: EventData, private val repository: SnookerOrgRepository) {
+    var matches: List<Match> = emptyList()
+    var rounds: Map<Long,String> = emptyMap()
+
+    suspend fun fetchMatches() {
+        val m = repository.matches(data.ID)
+        val r = repository.rounds(data.ID)
+        matches = m.await()
+        rounds = r.await()
+    }
+
     val name: String get() = data.Name
     val location: String get() = "${data.Venue} · ${data.City}, ${data.Country}"
     val country: String get() = data.Country

@@ -10,6 +10,8 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import name.kropp.android.snooker.api.Event
 import name.kropp.android.snooker.api.Match
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private var event: Event? = null
@@ -19,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         get() = getApplication() as SnookerApplication
 
     private val longDateFormat = DateFormat.getLongDateFormat(this)
+    private val yearFormat = SimpleDateFormat("YYYY", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,7 +32,7 @@ class MainActivity : AppCompatActivity() {
 
         update()
 
-        swipe.setColorSchemeResources(R.color.colorPrimary, R.color.colorPrimaryDark, R.color.colorPrimaryLight)
+        swipe.setColorSchemeResources(R.color.colorPrimaryDark, R.color.colorPrimaryLight)
         swipe.setOnRefreshListener {
             update()
         }
@@ -37,18 +40,20 @@ class MainActivity : AppCompatActivity() {
 
     private fun update() {
         launch(UI) {
+            swipe.isRefreshing = true
+
             val event = application.repository.event(536)
+            this@MainActivity.event = event
 
             event_location.text = event.location
             event_location_flag.setImageResource(flagResource(event.country))
             event_dates.text = "${longDateFormat.format(event.startDate)} — ${longDateFormat.format(event.endDate)}"
 
-            toolbar.title = event.name
+            toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
 
-            this@MainActivity.event = event
+            event.fetchMatches()
 
             matchesListAdapter.setEvent(event)
-
             matchesListAdapter.notifyDataSetChanged()
             swipe.isRefreshing = false
         }
