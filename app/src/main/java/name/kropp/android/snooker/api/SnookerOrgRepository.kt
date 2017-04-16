@@ -86,6 +86,7 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
         rounds = r.await()
     }
 
+    val id: Long get() = data.ID
     val name: String get() = data.Name
     val location: String get() = "${data.Venue} · ${data.City}, ${data.Country}"
     val country: String get() = data.Country
@@ -111,6 +112,7 @@ class Match(private val data: MatchData, val player1: Player, val player2: Playe
         get() = data.WinnerID == data.Player1ID
     val isPlayer2Winner: Boolean
         get() = data.WinnerID == data.Player2ID
+    val  worldSnookerId: Long get() = data.WorldSnookerID
 }
 
 class Player(private val data: PlayerData) {

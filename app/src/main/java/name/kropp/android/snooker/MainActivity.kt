@@ -1,7 +1,10 @@
 package name.kropp.android.snooker
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.support.customtabs.CustomTabsIntent
+import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
@@ -60,8 +63,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun onMatchClicked(match: Match) {
-        val intent = Intent(this, MatchActivity::class.java)
-        intent.putExtra("id", match.id)
-        startActivity(intent)
+//        val intent = Intent(this, MatchActivity::class.java)
+//        intent.putExtra("id", match.id)
+        //startActivity(intent)
+        val url = "http://livescores.worldsnookerdata.com/Matches/Result/${event?.id}/${match.worldSnookerId}"
+        val customTabsIntent = CustomTabsIntent.Builder().apply {
+            setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimaryDark))
+        }.build()
+        customTabsIntent.launchUrl(this, Uri.parse(url))
     }
 }
