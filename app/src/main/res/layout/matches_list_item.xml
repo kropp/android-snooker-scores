@@ -1,33 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:padding="@dimen/padding"
-    >
-    <LinearLayout
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         >
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding"
+        >
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/flag1"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_width="@dimen/flagWidth"
+            android:layout_height="@dimen/flagHeight" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textSize="@dimen/textSize"
             android:textColor="@color/textColor"
+            android:layout_marginStart="@dimen/flagSpacing"
             android:id="@android:id/text1"/>
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="textEnd"
+            android:textSize="@dimen/textSize"
+            android:textColor="@color/textColor"
+            android:id="@+id/aux1"/>
+    </RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/padding"
+        >
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/flag2"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true"
+            android:layout_width="@dimen/flagWidth"
+            android:layout_height="@dimen/flagHeight" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/flagSpacing"
             android:textSize="@dimen/textSize"
             android:textColor="@color/textColor"
             android:id="@android:id/text2"/>
-    </LinearLayout>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:textAlignment="textEnd"
-        android:textSize="@dimen/textSize"
-        android:textColor="@color/textColor"
-        android:id="@+id/auxiliaryText"/>
-</RelativeLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentEnd="true"
+            android:textAlignment="textEnd"
+            android:textSize="@dimen/textSize"
+            android:textColor="@color/textColor"
+            android:id="@+id/aux2"/>
+    </RelativeLayout>
+</LinearLayout>

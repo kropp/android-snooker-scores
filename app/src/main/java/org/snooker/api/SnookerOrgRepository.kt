@@ -95,6 +95,7 @@ class Player(private val data: PlayerData) {
         } else {
             "${data.FirstName} ${data.LastName}"
         }
+    val nationality: String get() = data.Nationality
 }
 
 @JsonIgnoreProperties(ignoreUnknown = true)
@@ -104,5 +105,6 @@ data class PlayerData(
     val MiddleName: String,
     val LastName: String,
     val ShortName: String,
-    val SurnameFirst: Boolean
+    val SurnameFirst: Boolean,
+    val Nationality: String
 )
