@@ -19,7 +19,8 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MatchActivity"></activity>
+        <activity android:name=".MatchActivity"
+            android:theme="@style/AppTheme"/>
     </application>
 
 </manifest>
