@@ -1,5 +1,9 @@
 package name.kropp.android.snooker.api
 
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.Unconfined
+import kotlinx.coroutines.experimental.async
 import name.kropp.android.snooker.YMDDateFormat
 import java.util.*
 
@@ -7,11 +11,19 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
     var matches: List<Match> = emptyList()
     var rounds: Map<Long,String> = emptyMap()
 
-    suspend fun fetchMatches(cache: Boolean) {
-        val m = repository.matches(data.ID, cache)
-        val r = repository.rounds(data.ID, cache)
-        matches = m.await()
-        rounds = r.await()
+    fun rounds(): Deferred<Map<Long,String>> {
+        if (rounds.isNotEmpty()) return async(Unconfined) { rounds }
+        val result = repository.rounds(data.ID, true)
+        result.invokeOnCompletion { rounds = result.getCompleted() }
+        return result
+    }
+
+    suspend fun ongoingMatches(cache: Boolean) = repository.ongoingMatches(cache).await().filter { it.eventId == data.ID }
+
+    fun matches(cache: Boolean): Deferred<List<Match>> {
+        val result = repository.matches(data.ID, cache)
+        result.invokeOnCompletion { matches = result.getCompleted() }
+        return result
     }
 
     val id: Long get() = data.ID

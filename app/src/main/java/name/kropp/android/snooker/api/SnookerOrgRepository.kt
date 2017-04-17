@@ -71,15 +71,21 @@ class SnookerOrgRepository(context: Context) {
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
-        service(cache).matchesOfEvent(id).execute().body().map {
-            val player1 = player(it.Player1ID)
-            val player2 = player(it.Player2ID)
-            Match(it, player1.await(), player2.await(), this@SnookerOrgRepository)
-        }
+        service(cache).matchesOfEvent(id).execute().body()?.map { createMatch(it) } ?: emptyList()
+    }
+
+    fun ongoingMatches(cache: Boolean) = async(CommonPool) {
+        service(cache).ongoingMatches().execute().body()?.map { createMatch(it) } ?: emptyList()
     }
 
     fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
-        service(cache).roundsOfEvent(id).execute().body().associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" }
+        service(cache).roundsOfEvent(id).execute().body()?.associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" } ?: emptyMap()
+    }
+
+    private suspend fun createMatch(it: MatchData): Match {
+        val player1 = player(it.Player1ID)
+        val player2 = player(it.Player2ID)
+        return Match(it, player1.await(), player2.await(), this@SnookerOrgRepository)
     }
 
     fun player(id: Long) = async(CommonPool) {

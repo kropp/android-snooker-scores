@@ -40,7 +40,6 @@ class MainActivity : AppCompatActivity() {
 
         tabLayout.setupWithViewPager(pager)
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
-
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
         // show data from cache immediately
@@ -74,11 +73,14 @@ class MainActivity : AppCompatActivity() {
 
                 toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
 
-                event.fetchMatches(cache)
+                val r = event.rounds()
+                val allMatches = event.matches(cache)
+                val liveMatches = event.ongoingMatches(cache)
+                r.await()
 
-                liveMatchesListAdapter.setEvent(event.matches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, event.rounds, true)
+                liveMatchesListAdapter.setEvent(liveMatches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, event.rounds, true)
                 liveMatchesListAdapter.notifyDataSetChanged()
-                allMatchesListAdapter.setEvent(event.matches, event.rounds, false)
+                allMatchesListAdapter.setEvent(allMatches.await(), event.rounds, false)
                 allMatchesListAdapter.notifyDataSetChanged()
             } catch (e: UnknownHostException) {
                 showOfflineSnackbar()

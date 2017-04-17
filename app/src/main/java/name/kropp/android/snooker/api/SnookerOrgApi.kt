@@ -8,6 +8,9 @@ interface SnookerOrgApi {
     fun event(@Query("e") eventId: Long): Call<List<EventData>>
 
     @GET("/")
+    fun ongoingMatches(@Query("t") requestType: String = "7"): Call<List<MatchData>>
+
+    @GET("/")
     fun matchesOfEvent(@Query("e") eventId: Long, @Query("t") requestType: String = "6"): Call<List<MatchData>>
 
     @GET("/")
