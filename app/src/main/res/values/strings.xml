@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Snooker Scores</string>
+    <string name="tab_live">Live</string>
+    <string name="tab_all">All Matches</string>
 </resources>

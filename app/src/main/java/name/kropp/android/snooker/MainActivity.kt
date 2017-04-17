@@ -1,13 +1,13 @@
 package name.kropp.android.snooker
 
-import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.customtabs.CustomTabsIntent
+import android.support.design.widget.TabLayout
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
+import android.view.MotionEvent
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
@@ -18,7 +18,8 @@ import java.util.*
 
 class MainActivity : AppCompatActivity() {
     private var event: Event? = null
-    private val matchesListAdapter = MatchesListAdapter(this)
+    private val liveMatchesListAdapter = MatchesListAdapter(this)
+    private val allMatchesListAdapter = MatchesListAdapter(this)
 
     private val application: SnookerApplication
         get() = getApplication() as SnookerApplication
@@ -30,8 +31,17 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        matches_list.adapter = matchesListAdapter
-        matches_list.layoutManager = LinearLayoutManager(this)
+        tabLayout.addTab(tabLayout.newTab().apply { setText(R.string.tab_live) })
+        tabLayout.addTab(tabLayout.newTab().apply { setText(R.string.tab_all) })
+        tabLayout.setupWithViewPager(pager)
+        pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
+
+        pager.setOnTouchListener { view, event ->
+            swipe.isEnabled = event.action == MotionEvent.ACTION_UP
+            false
+        }
+
+        pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
         update()
 
@@ -56,8 +66,11 @@ class MainActivity : AppCompatActivity() {
 
             event.fetchMatches()
 
-            matchesListAdapter.setEvent(event)
-            matchesListAdapter.notifyDataSetChanged()
+            liveMatchesListAdapter.setEvent(event.matches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, event.rounds, true)
+            liveMatchesListAdapter.notifyDataSetChanged()
+            allMatchesListAdapter.setEvent(event.matches, event.rounds, false)
+            allMatchesListAdapter.notifyDataSetChanged()
+
             swipe.isRefreshing = false
         }
     }

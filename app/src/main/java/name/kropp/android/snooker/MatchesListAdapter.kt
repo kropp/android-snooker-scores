@@ -8,7 +8,6 @@ import android.text.format.DateFormat
 import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import name.kropp.android.snooker.api.Event
 import name.kropp.android.snooker.api.Match
 import java.text.SimpleDateFormat
 import java.util.*
@@ -21,12 +20,19 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
     private var matchesByRound = sortedMapOf<Long,List<Match>>()
     private var rounds = mapOf<Long,String>()
 
-    fun setEvent(event: Event) {
-        this.rounds = event.rounds
-        matchesByRound = event.matches
-                .groupBy { it.round }
-                .map { it.key to it.value.sortedBy { if (it.isActive) -100000+it.number else if (it.isStarted) -10000+it.number else if (it.isFinished) 100000-it.number else it.number } }
-                .toMap().toSortedMap()
+    fun setEvent(matches: List<Match>, rounds: Map<Long,String>, reorder: Boolean) {
+        this.rounds = rounds
+        matchesByRound = matches.groupBy { it.round }
+                .map { it.key to it.value.sortedBy {
+                    if (reorder) {
+                        if (it.isActive) -100000 + it.number
+                        else if (it.isStarted) -10000 + it.number
+                        else if (it.isFinished) 100000 - it.number
+                        else it.number
+                    } else {
+                        it.number
+                    }
+                } }.toMap().toSortedMap()
     }
 
     override fun getItemCount() = matchesByRound.values.sumBy { it.size + 1 }
