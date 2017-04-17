@@ -5,5 +5,5 @@ import name.kropp.android.snooker.api.SnookerOrgRepository
 
 
 class SnookerApplication : Application() {
-    val repository = SnookerOrgRepository(this)
+    val repository by lazy { SnookerOrgRepository(this) }
 }

@@ -1,40 +1,64 @@
 package name.kropp.android.snooker.api
 
-import android.content.ContentValues
 import android.content.Context
+import android.util.Log
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.MapperFeature
-import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
-import name.kropp.android.snooker.YMDDateFormat
-import name.kropp.android.snooker.db.SnookerOrgDbHelper
+import okhttp3.Cache
+import okhttp3.CacheControl
+import okhttp3.OkHttpClient
+import okhttp3.Response
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
-import java.util.*
+import java.io.File
+import java.io.IOException
+import java.net.CacheResponse
 
 class SnookerOrgRepository(context: Context) {
     private val TAG = "API"
-    private val dbHelper by lazy { SnookerOrgDbHelper(context) }
-    private val db
-        get() = dbHelper.writableDatabase
 
-    val objectMapper: ObjectMapper = jacksonObjectMapper()
+    private val jacksonFactory = JacksonConverterFactory.create(
+            jacksonObjectMapper()
             .enable(JsonParser.Feature.IGNORE_UNDEFINED)
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true)
+            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true))
 
-    private val service by lazy {
-        val jacksonFactory = JacksonConverterFactory.create(objectMapper)
+    private val okHttpClient: OkHttpClient
+    private val cachingOkHttpClient: OkHttpClient
 
-        val retrofit = Retrofit.Builder()
-//                .callFactory(noCacheCallFactory)
-                .baseUrl("http://api.snooker.org/")
-                .addConverterFactory(jacksonFactory)
-                .build()
+    init {
+        val cache = try {
+            Cache(File(context.cacheDir, "responses"), 10 * 1024 * 1024)
+        } catch(e: IOException) {
+            Log.i(TAG, "Failed to created HTTP cache", e)
+            null
+        }
 
-        retrofit.create(SnookerOrgApi::class.java)
+        okHttpClient = OkHttpClient().newBuilder()
+                .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .cache(cache).build()
+
+        cachingOkHttpClient = OkHttpClient().newBuilder()
+                .addNetworkInterceptor { chain ->
+                    val age = 60 * 60 * 24 * 30
+                    chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build())
+                        .newBuilder().header("Cache-Control", "public, max-age=$age, max-stale=$age").build()
+                }
+                .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
+                .cache(cache).build()
     }
+
+    private val service by lazy { createRetrofitService(okHttpClient) }
+    private val cachingService by lazy { createRetrofitService(cachingOkHttpClient) }
+
+    private fun createRetrofitService(client: OkHttpClient) = Retrofit.Builder()
+            .client(client)
+            .baseUrl("http://api.snooker.org/")
+            .addConverterFactory(jacksonFactory)
+            .build().create(SnookerOrgApi::class.java)
 
     suspend fun event(id: Long) = Event(service.event(id).await().first(), this)
 
@@ -53,77 +77,6 @@ class SnookerOrgRepository(context: Context) {
     }
 
     fun player(id: Long) = async(CommonPool) {
-        val cursor = db.query(SnookerOrgDbHelper.Companion.TABLE_PLAYERS, SnookerOrgDbHelper.Companion.COLUMN_PLAYERS, "ID = ?", arrayOf(id.toString()), null, null, null)
-        if (cursor.count == 1) {
-            cursor.moveToNext()
-            val json = cursor.getString(1)
-            cursor.close()
-
-            objectMapper.readValue<Player>(json, Player::class.java)
-        } else {
-            cursor.close()
-
-            val playerData = service.player(id).await().first()
-            val json = objectMapper.writeValueAsString(playerData)
-            val values = ContentValues()
-            values.put("id", playerData.ID)
-            values.put("json", json)
-            db.insert(SnookerOrgDbHelper.Companion.TABLE_PLAYERS, null, values)
-
-            Player(playerData)
-        }
+        Player(cachingService.player(id).await().first())
     }
 }
-
-class Event(private val data: EventData, private val repository: SnookerOrgRepository) {
-    var matches: List<Match> = emptyList()
-    var rounds: Map<Long,String> = emptyMap()
-
-    suspend fun fetchMatches() {
-        val m = repository.matches(data.ID)
-        val r = repository.rounds(data.ID)
-        matches = m.await()
-        rounds = r.await()
-    }
-
-    val id: Long get() = data.ID
-    val name: String get() = data.Name
-    val location: String get() = "${data.Venue} · ${data.City}, ${data.Country}"
-    val country: String get() = data.Country
-    val startDate: Date get() = YMDDateFormat.parse(data.StartDate)
-    val endDate: Date get() = YMDDateFormat.parse(data.EndDate)
-}
-
-class Match(private val data: MatchData, val player1: Player, val player2: Player, private val repository: SnookerOrgRepository) {
-    val id get() = data.ID
-    val number get() = data.Number
-    val score1 get() = data.Score1
-    val score2 get() = data.Score2
-    val round get() = data.Round
-    val date: Date
-        get() = data.ScheduledDate
-    val isStarted: Boolean
-        get() = data.Unfinished
-    val isFinished: Boolean
-        get() = !data.Unfinished && data.WinnerID != 0L
-    val isActive: Boolean
-        get() = data.Unfinished && !data.OnBreak
-    val isPlayer1Winner: Boolean
-        get() = data.WinnerID == data.Player1ID
-    val isPlayer2Winner: Boolean
-        get() = data.WinnerID == data.Player2ID
-    val  worldSnookerId: Long get() = data.WorldSnookerID
-}
-
-class Player(private val data: PlayerData) {
-    val name: String
-        get() = if (data.SurnameFirst) {
-            "${data.LastName} ${data.FirstName}"
-        } else if (data.MiddleName.isNotEmpty()) {
-            "${data.FirstName} ${data.MiddleName} ${data.LastName}"
-        } else {
-            "${data.FirstName} ${data.LastName}"
-        }
-    val nationality: String get() = data.Nationality
-}
-

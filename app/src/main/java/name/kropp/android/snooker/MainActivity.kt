@@ -31,21 +31,23 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        tabLayout.addTab(tabLayout.newTab().apply { setText(R.string.tab_live) })
-        tabLayout.addTab(tabLayout.newTab().apply { setText(R.string.tab_all) })
         tabLayout.setupWithViewPager(pager)
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
-
-        pager.setOnTouchListener { view, event ->
-            swipe.isEnabled = event.action == MotionEvent.ACTION_UP
-            false
-        }
 
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
         update()
 
+        pager.setOnTouchListener { view, event ->
+            swipe.isEnabled = event.action == MotionEvent.ACTION_UP
+            false
+        }
+        app_bar_layout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
+            swipe.isEnabled = verticalOffset == 0
+        }
+
         swipe.setColorSchemeResources(R.color.colorPrimaryDark, R.color.colorPrimaryLight)
+        swipe.setDistanceToTriggerSync(20)
         swipe.setOnRefreshListener {
             update()
         }
