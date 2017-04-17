@@ -10,13 +10,12 @@ import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
-import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.File
 import java.io.IOException
-import java.net.CacheResponse
+import java.util.concurrent.TimeUnit
 
 class SnookerOrgRepository(context: Context) {
     private val TAG = "API"
@@ -38,11 +37,17 @@ class SnookerOrgRepository(context: Context) {
         }
 
         okHttpClient = OkHttpClient().newBuilder()
+                .addInterceptor { chain ->
+                    chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build())
+                        .newBuilder().header("Cache-Control", "public, max-age=3600").build()
+                }
                 .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .cache(cache).build()
 
         cachingOkHttpClient = OkHttpClient().newBuilder()
-                .addNetworkInterceptor { chain ->
+                .connectTimeout(0L, TimeUnit.MILLISECONDS)
+                .readTimeout(0L, TimeUnit.MILLISECONDS)
+                .addInterceptor { chain ->
                     val age = 60 * 60 * 24 * 30
                     chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build())
                         .newBuilder().header("Cache-Control", "public, max-age=$age, max-stale=$age").build()
@@ -53,6 +58,7 @@ class SnookerOrgRepository(context: Context) {
 
     private val service by lazy { createRetrofitService(okHttpClient) }
     private val cachingService by lazy { createRetrofitService(cachingOkHttpClient) }
+    fun service(cache: Boolean) = if (cache) cachingService else service
 
     private fun createRetrofitService(client: OkHttpClient) = Retrofit.Builder()
             .client(client)
@@ -60,23 +66,23 @@ class SnookerOrgRepository(context: Context) {
             .addConverterFactory(jacksonFactory)
             .build().create(SnookerOrgApi::class.java)
 
-    suspend fun event(id: Long) = Event(service.event(id).await().first(), this)
+    suspend fun event(id: Long, cache: Boolean) = Event(service(cache).event(id).execute().body().first(), this@SnookerOrgRepository)
 
-    suspend fun match(id: Long) = service.match(id).await()//.map { Match(it, this) }.sortedBy { it.date }
+    suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
-    fun matches(id: Long) = async(CommonPool) {
-        service.matchesOfEvent(id).await().map {
+    fun matches(id: Long, cache: Boolean) = async(CommonPool) {
+        service(cache).matchesOfEvent(id).execute().body().map {
             val player1 = player(it.Player1ID)
             val player2 = player(it.Player2ID)
             Match(it, player1.await(), player2.await(), this@SnookerOrgRepository)
         }
     }
 
-    fun rounds(id: Long) = async(CommonPool) {
-        service.roundsOfEvent(id).await().associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" }
+    fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
+        service(cache).roundsOfEvent(id).execute().body().associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" }
     }
 
     fun player(id: Long) = async(CommonPool) {
-        Player(cachingService.player(id).await().first())
+        Player(cachingService.player(id).execute().body().first())
     }
 }

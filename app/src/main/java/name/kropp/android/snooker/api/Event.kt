@@ -7,9 +7,9 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
     var matches: List<Match> = emptyList()
     var rounds: Map<Long,String> = emptyMap()
 
-    suspend fun fetchMatches() {
-        val m = repository.matches(data.ID)
-        val r = repository.rounds(data.ID)
+    suspend fun fetchMatches(cache: Boolean) {
+        val m = repository.matches(data.ID, cache)
+        val r = repository.rounds(data.ID, cache)
         matches = m.await()
         rounds = r.await()
     }
