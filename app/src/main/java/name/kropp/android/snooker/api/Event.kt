@@ -27,6 +27,7 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
     }
 
     val id: Long get() = data.ID
+    val worldSnookerId: Long get() = data.WorldSnookerId
     val name: String get() = data.Name
     val location: String get() = "${data.Venue} · ${data.City}, ${data.Country}"
     val country: String get() = data.Country

@@ -2,6 +2,6 @@
     <string name="app_name">Snooker Scores</string>
     <string name="tab_live">Live</string>
     <string name="tab_all">All Matches</string>
-    <string name="offline">Offline</string>
+    <string name="no_connection">No connection</string>
     <string name="retry">Retry</string>
 </resources>

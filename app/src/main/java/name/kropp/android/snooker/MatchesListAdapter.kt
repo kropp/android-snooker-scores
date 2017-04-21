@@ -1,11 +1,8 @@
 package name.kropp.android.snooker
 
-import android.graphics.Typeface
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.text.SpannableString
 import android.text.format.DateFormat
-import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import name.kropp.android.snooker.api.Match
@@ -43,30 +40,29 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
             holder.match = match
 
             holder.view.setBackgroundResource(if (position % 2 == 0) R.color.colorPrimaryDark else R.color.colorPrimary)
-            holder.aux1.setTextColor(ContextCompat.getColor(holder.view.context, if (match.isActive) R.color.colorAccent else R.color.textColor))
-            holder.aux2.setTextColor(ContextCompat.getColor(holder.view.context, if (match.isActive) R.color.colorAccent else R.color.textColor))
 
             if (match.isStarted || match.isFinished) {
-                holder.aux1.text = playerName(match.score1.toString(), match.isPlayer1Winner)
-                holder.aux2.text = playerName(match.score2.toString(), match.isPlayer2Winner)
+                holder.aux1.text = match.score1.toString()
+                holder.aux2.text = match.score2.toString()
             } else {
                 holder.aux1.text = dateFormat.format(match.date)
                 holder.aux2.text = ""
             }
 
+            val normalOrFade1 = ContextCompat.getColor(holder.view.context, if (match.isPlayer2Winner) R.color.colorPrimaryLight else R.color.textColor)
+            holder.text1.setTextColor(normalOrFade1)
+            holder.aux1.setTextColor(if (match.isActive) ContextCompat.getColor(holder.view.context, R.color.colorAccent) else normalOrFade1)
+            val normalOrFade2 = ContextCompat.getColor(holder.view.context, if (match.isPlayer1Winner) R.color.colorPrimaryLight else R.color.textColor)
+            holder.text2.setTextColor(normalOrFade2)
+            holder.aux2.setTextColor(if (match.isActive) ContextCompat.getColor(holder.view.context, R.color.colorAccent) else normalOrFade2)
+
             holder.flag1.setImageResource(flagResource(match.player1.nationality))
-            holder.text1.text = playerName(match.player1.name, match.isPlayer1Winner)
+            holder.text1.text = match.player1.name
 
             holder.flag2.setImageResource(flagResource(match.player2.nationality))
-            holder.text2.text = playerName(match.player2.name, match.isPlayer2Winner)
+            holder.text2.text = match.player2.name
         } else if (holder is RoundViewHolder) {
             holder.text.text = roundAt(position)
-        }
-    }
-
-    private fun playerName(name: String, bold: Boolean) = SpannableString(name).apply {
-        if (bold) {
-            setSpan(StyleSpan(Typeface.BOLD), 0, name.length, 0)
         }
     }
 
