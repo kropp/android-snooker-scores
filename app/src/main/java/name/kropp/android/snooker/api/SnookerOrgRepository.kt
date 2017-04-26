@@ -71,15 +71,30 @@ class SnookerOrgRepository(context: Context) {
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
-        service(cache).matchesOfEvent(id).execute().body()?.map { createMatch(it) } ?: emptyList()
+        try {
+            service(cache).matchesOfEvent(id).execute().body()
+        } catch(e: Exception) {
+            Log.i(TAG, "Error retrieving matches list for event $id", e)
+            null
+        }?.map { createMatch(it) } ?: emptyList()
     }
 
     fun ongoingMatches(cache: Boolean) = async(CommonPool) {
-        service(cache).ongoingMatches().execute().body()?.map { createMatch(it) } ?: emptyList()
+        try {
+            service(cache).ongoingMatches().execute().body()
+        } catch(e: Exception) {
+            Log.i(TAG, "Error retrieving ongoing matches list", e)
+            null
+        }?.map { createMatch(it) } ?: emptyList()
     }
 
     fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
-        service(cache).roundsOfEvent(id).execute().body()?.associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" } ?: emptyMap()
+        try {
+            service(cache).roundsOfEvent(id).execute().body()
+        } catch(e: Exception) {
+            Log.i(TAG, "Error retrieving rounds list for event $id", e)
+            null
+        }?.associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" } ?: emptyMap()
     }
 
     private suspend fun createMatch(it: MatchData): Match {
