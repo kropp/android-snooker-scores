@@ -104,6 +104,8 @@ class SnookerOrgRepository(context: Context) {
     }
 
     fun player(id: Long) = async(CommonPool) {
-        Player(cachingService.player(id).execute().body().first())
+        val response = cachingService.player(id).execute()
+        val body = if (response.isSuccessful) response.body() else service.player(id).execute().body()
+        Player(body.first())
     }
 }

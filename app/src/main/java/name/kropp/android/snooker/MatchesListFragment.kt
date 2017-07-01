@@ -12,7 +12,7 @@ class MatchesListFragment(private val matchesListAdapter: MatchesListAdapter) : 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.matches_fragment, container, false)
 
-        val matches_list = view.findViewById(R.id.matches_list) as RecyclerView
+        val matches_list = view.findViewById<RecyclerView>(R.id.matches_list)
 
         matches_list.adapter = matchesListAdapter
         matches_list.layoutManager = LinearLayoutManager(context)
