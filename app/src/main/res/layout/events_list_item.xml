@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    android:padding="@dimen/padding"
+    >
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/flag"
+        android:layout_width="@dimen/flagWidth"
+        android:layout_height="@dimen/flagHeight"
+        android:layout_marginTop="4dp"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_marginStart="@dimen/padding"
+        >
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/textSize"
+            android:textColor="@color/textColor"
+            android:id="@android:id/text1"/>
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/textSmallSize"
+        android:textColor="@color/colorPrimaryLight"
+        android:id="@android:id/text2"/>
+    </LinearLayout>
+</LinearLayout>

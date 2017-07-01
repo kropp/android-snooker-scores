@@ -66,6 +66,8 @@ class SnookerOrgRepository(context: Context) {
             .addConverterFactory(jacksonFactory)
             .build().create(SnookerOrgApi::class.java)
 
+    suspend fun events(cache: Boolean) = service(cache).events().execute().body().map { Event(it, this@SnookerOrgRepository) }
+
     suspend fun event(id: Long, cache: Boolean) = Event(service(cache).event(id).execute().body().first(), this@SnookerOrgRepository)
 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }

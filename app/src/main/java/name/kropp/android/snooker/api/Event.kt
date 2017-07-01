@@ -33,4 +33,6 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
     val country: String get() = data.Country
     val startDate: Date get() = YMDDateFormat.parse(data.StartDate)
     val endDate: Date get() = YMDDateFormat.parse(data.EndDate)
+
+    val isQualifying = data.Type == "Qualifying"
 }
