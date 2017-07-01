@@ -104,7 +104,7 @@ class SnookerOrgRepository(context: Context) {
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving rounds list for event $id", e)
             null
-        }?.associate { it.Round to "${it.RoundName} (Best of ${it.Distance*2-1})" } ?: emptyMap()
+        }?.associate { it.Round to it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance*2-1})" else "" } ?: emptyMap()
     }
 
     private suspend fun createMatch(it: MatchData): Match {
