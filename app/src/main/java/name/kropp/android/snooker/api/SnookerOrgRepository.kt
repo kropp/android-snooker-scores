@@ -11,6 +11,8 @@ import okhttp3.Cache
 import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
+import retrofit2.Call
+import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.File
@@ -58,7 +60,13 @@ class SnookerOrgRepository(context: Context) {
 
     private val service by lazy { createRetrofitService(okHttpClient) }
     private val cachingService by lazy { createRetrofitService(cachingOkHttpClient) }
-    fun service(cache: Boolean) = if (cache) cachingService else service
+    fun <R> withService(cache: Boolean, call: SnookerOrgApi.() -> Call<R>): R {
+        if (cache) {
+            val response = cachingService.call().execute()
+            if (response.isSuccessful) response.body()
+        }
+        return service.call().execute().body()
+    }
 
     private fun createRetrofitService(client: OkHttpClient) = Retrofit.Builder()
             .client(client)
@@ -66,15 +74,15 @@ class SnookerOrgRepository(context: Context) {
             .addConverterFactory(jacksonFactory)
             .build().create(SnookerOrgApi::class.java)
 
-    suspend fun events(cache: Boolean) = service(cache).events().execute().body().map { Event(it, this@SnookerOrgRepository) }
+    suspend fun events(cache: Boolean) = withService(cache) { events() }.map { Event(it, this@SnookerOrgRepository) }
 
-    suspend fun event(id: Long, cache: Boolean) = Event(service(cache).event(id).execute().body().first(), this@SnookerOrgRepository)
+    suspend fun event(id: Long, cache: Boolean) = Event(withService(cache) { event(id) }.first(), this@SnookerOrgRepository)
 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
         try {
-            service(cache).matchesOfEvent(id).execute().body()
+            withService(cache) { matchesOfEvent(id) }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving matches list for event $id", e)
             null
@@ -83,7 +91,7 @@ class SnookerOrgRepository(context: Context) {
 
     fun ongoingMatches(cache: Boolean) = async(CommonPool) {
         try {
-            service(cache).ongoingMatches().execute().body()
+            withService(cache) { ongoingMatches() }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving ongoing matches list", e)
             null
@@ -92,7 +100,7 @@ class SnookerOrgRepository(context: Context) {
 
     fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
         try {
-            service(cache).roundsOfEvent(id).execute().body()
+            withService(cache) { roundsOfEvent(id) }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving rounds list for event $id", e)
             null
@@ -106,8 +114,6 @@ class SnookerOrgRepository(context: Context) {
     }
 
     fun player(id: Long) = async(CommonPool) {
-        val response = cachingService.player(id).execute()
-        val body = if (response.isSuccessful) response.body() else service.player(id).execute().body()
-        Player(body.first())
+        Player(withService(true) { player(id) }.first())
     }
 }
