@@ -1,20 +1,39 @@
 package name.kropp.android.snooker
 
+import android.util.Log
 import java.text.SimpleDateFormat
 
 
 val YMDDateFormat = SimpleDateFormat("yyyy-MM-dd")
 
 fun flagResource(country: String) = when(country) {
-    "England" -> R.drawable.gb_eng
-    "Northern Ireland" -> R.drawable.gb_nir
-    "Scotland" -> R.drawable.gb_sct
-    "Wales" -> R.drawable.gb_wls
     "Australia" -> R.drawable.au
     "Belgium" -> R.drawable.be
+    "Brazil" -> R.drawable.br
     "China" -> R.drawable.cn
-    "Ireland" -> R.drawable.ie
-    "Thailand" -> R.drawable.th
+    "Cyprus" -> R.drawable.cy
+    "Egypt" -> R.drawable.eg
+    "England" -> R.drawable.gb_eng
+    "Finland" -> R.drawable.fi
+    "Germany" -> R.drawable.de
+    "Gibraltar" -> R.drawable.gi
     "Hong Kong" -> R.drawable.hk
-    else -> R.drawable.unknown
+    "India" -> R.drawable.`in`
+    "Iran" -> R.drawable.ir
+    "Ireland" -> R.drawable.ie
+    "Israel" -> R.drawable.`is`
+    "Malaysia" -> R.drawable.my
+    "Malta" -> R.drawable.mt
+    "Northern Ireland" -> R.drawable.gb_nir
+    "Norway" -> R.drawable.no
+    "Poland" -> R.drawable.pl
+    "Pakistan" -> R.drawable.pk
+    "Scotland" -> R.drawable.gb_sct
+    "Switzerland" -> R.drawable.ch
+    "Thailand" -> R.drawable.th
+    "Wales" -> R.drawable.gb_wls
+    else -> {
+        Log.i("flag", "No flag for $country")
+        R.drawable.unknown
+    }
 }
