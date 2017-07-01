@@ -38,14 +38,16 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        val id = intent.getLongExtra("id", 537)
+
         tabLayout.setupWithViewPager(pager)
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
         // show data from cache immediately
-        update(true)
+        update(id, true)
         // and request update to show as soon as it is ready
-        update()
+        update(id)
 
         pager.setOnTouchListener { view, event ->
             swipe.isEnabled = event.action == MotionEvent.ACTION_UP
@@ -58,14 +60,14 @@ class MainActivity : AppCompatActivity() {
         swipe.setColorSchemeResources(R.color.colorPrimaryDark, R.color.colorPrimaryLight)
         swipe.setDistanceToTriggerSync(20)
         swipe.setOnRefreshListener {
-            update()
+            update(id)
         }
     }
 
-    private fun update(cache: Boolean = false) {
+    private fun update(id: Long, cache: Boolean = false) {
         launch(UI) {
             try {
-                event = run(CommonPool) { application.repository.event(536, cache) }
+                event = run(CommonPool) { application.repository.event(id, cache) }
 
                 event_location.text = event.location
                 event_location_flag.setImageResource(flagResource(event.country))
@@ -99,7 +101,7 @@ class MainActivity : AppCompatActivity() {
         Snackbar.make(main_layout, R.string.no_connection, Snackbar.LENGTH_INDEFINITE)
                 .setAction(R.string.retry) {
                     swipe.isRefreshing = true
-                    update()
+                    update(intent.getLongExtra("id", 537))
                 }.show()
     }
 

@@ -21,6 +21,8 @@ class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Ada
         if (holder is EventViewHolder) {
             val event = events[position]
 
+            holder.event = event
+
             holder.flag.setImageResource(flagResource(event.country))
             holder.text.text = event.name
             holder.aux.text = "${longDateFormat.format(event.startDate)} — ${longDateFormat.format(event.endDate)}"

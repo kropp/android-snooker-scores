@@ -1,10 +1,10 @@
 package name.kropp.android.snooker
 
+import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.text.format.DateFormat
 import android.util.Log
 import android.widget.Toast
@@ -14,7 +14,6 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.run
 import name.kropp.android.snooker.api.Event
-import name.kropp.android.snooker.api.Match
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
@@ -54,18 +53,6 @@ class EventsActivity : AppCompatActivity() {
         launch(UI) {
             try {
                 events = run(CommonPool) { application.repository.events(cache) }
-
-/*
-                val r = event.rounds()
-                val allMatches = event.matches(cache)
-                val liveMatches = event.ongoingMatches(cache)
-                r.await()
-
-                liveMatchesListAdapter.setEvent(liveMatches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, event.rounds, true)
-                liveMatchesListAdapter.notifyDataSetChanged()
-                allMatchesListAdapter.setEvent(allMatches.await(), event.rounds, false)
-                allMatchesListAdapter.notifyDataSetChanged()
-*/
                 eventsAdapter.events = events.filterNot(Event::isQualifying).filter { it.endDate >= Date() }
                 eventsAdapter.notifyDataSetChanged()
             } catch (e: UnknownHostException) {
@@ -89,16 +76,9 @@ class EventsActivity : AppCompatActivity() {
                 }.show()
     }
 
-    fun onMatchClicked(match: Match) {
-//        val intent = Intent(this, MatchActivity::class.java)
-//        intent.putExtra("id", match.id)
-        //startActivity(intent)
-/*
-        val url = "http://livescores.worldsnookerdata.com/Matches/LiveScoring/${event.worldSnookerId}/${match.worldSnookerId}"
-        val customTabsIntent = CustomTabsIntent.Builder().apply {
-            setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimaryDark))
-        }.build()
-        customTabsIntent.launchUrl(this, Uri.parse(url))
-*/
+    fun onEventClicked(event: Event) {
+        val intent = Intent(this, MainActivity::class.java)
+        intent.putExtra("id", event.id)
+        startActivity(intent)
     }
 }

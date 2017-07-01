@@ -15,7 +15,7 @@ class EventViewHolder(val activity: EventsActivity, val view: View): RecyclerVie
 
     init {
         view.setOnClickListener {
-            //match?.let { activity.onMatchClicked(it) }
+            event?.let { activity.onEventClicked(it) }
         }
     }
 }
