@@ -8,7 +8,6 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
 import okhttp3.Cache
-import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
@@ -27,7 +26,6 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true))
 
     private val okHttpClient: OkHttpClient
-    private val cachingOkHttpClient: OkHttpClient
 
     init {
         val cache = try {
@@ -41,34 +39,13 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
                 .readTimeout(30000L, TimeUnit.MILLISECONDS)
                 .connectTimeout(10000L, TimeUnit.MILLISECONDS)
                 .writeTimeout(10000L, TimeUnit.MILLISECONDS)
-                .addInterceptor { chain ->
-                    chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build())
-                        .newBuilder().header("Cache-Control", "public, max-age=3600").build()
-                }
-                .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
-                .cache(cache).build()
-
-        cachingOkHttpClient = OkHttpClient().newBuilder()
-                .connectTimeout(0L, TimeUnit.MILLISECONDS)
-                .readTimeout(0L, TimeUnit.MILLISECONDS)
-                .addInterceptor { chain ->
-                    val age = 60 * 60 * 24 * 30
-                    chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_CACHE).build())
-                        .newBuilder().header("Cache-Control", "public, max-age=$age, max-stale=$age").build()
-                }
                 .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .cache(cache).build()
     }
 
     private val service by lazy { createRetrofitService(okHttpClient) }
-    private val cachingService by lazy { createRetrofitService(cachingOkHttpClient) }
-    fun <R> withService(cache: Boolean, call: SnookerOrgApi.() -> Call<R>): R {
-        if (cache) {
-            val response = cachingService.call().execute()
-            if (response.isSuccessful) response.body()
-        }
-        return service.call().execute().body()
-    }
+
+    private fun <R> withService(call: SnookerOrgApi.() -> Call<R>) = service.call().execute().body()
 
     private fun createRetrofitService(client: OkHttpClient) = Retrofit.Builder()
             .client(client)
@@ -76,15 +53,15 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             .addConverterFactory(jacksonFactory)
             .build().create(SnookerOrgApi::class.java)
 
-    suspend fun events(cache: Boolean) = withService(cache) { events() }.map { Event(it, this@SnookerOrgRepository) }
+    suspend fun events(cache: Boolean) = withService { events() }.map { Event(it, this@SnookerOrgRepository) }
 
-    suspend fun event(id: Long, cache: Boolean) = Event(withService(cache) { event(id) }.first(), this@SnookerOrgRepository)
+    suspend fun event(id: Long, cache: Boolean) = Event(withService { event(id) }.first(), this@SnookerOrgRepository)
 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
         try {
-            withService(cache) { matchesOfEvent(id) }
+            withService { matchesOfEvent(id) }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving matches list for event $id", e)
             null
@@ -93,7 +70,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
 
     fun ongoingMatches(cache: Boolean) = async(CommonPool) {
         try {
-            withService(cache) { ongoingMatches() }
+            withService { ongoingMatches() }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving ongoing matches list", e)
             null
@@ -102,7 +79,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
 
     fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
         try {
-            withService(cache) { roundsOfEvent(id) }
+            withService { roundsOfEvent(id) }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving rounds list for event $id", e)
             null
@@ -120,7 +97,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         if (e != null) {
             e
         } else {
-            val result = PlayerFromApi(withService(true) { player(id) }.first())
+            val result = PlayerFromApi(withService { player(id) }.first())
             database.playerDao().add(PlayerEntity(id, result.name, result.nationality))
             result
         }
