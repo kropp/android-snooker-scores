@@ -1,7 +1,12 @@
 package name.kropp.android.snooker.api
 
-class Player(private val data: PlayerData) {
+interface Player {
     val name: String
+    val nationality: String
+}
+
+class PlayerFromApi(private val data: PlayerData) : Player {
+    override val name: String
         get() = if (data.LastName.isEmpty()) {
             data.TeamName + if (data.TeamNumber > 0) " ${data.TeamNumber}" else ""
         } else if (data.SurnameFirst) {
@@ -11,5 +16,5 @@ class Player(private val data: PlayerData) {
         } else {
             "${data.FirstName} ${data.LastName}"
         }
-    val nationality: String get() = data.Nationality
+    override val nationality: String get() = data.Nationality
 }

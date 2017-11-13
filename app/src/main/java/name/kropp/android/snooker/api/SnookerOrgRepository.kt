@@ -12,14 +12,13 @@ import okhttp3.CacheControl
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Call
-import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
-class SnookerOrgRepository(context: Context) {
+class SnookerOrgRepository(context: Context, private val database: AppDatabase) {
     private val TAG = "API"
 
     private val jacksonFactory = JacksonConverterFactory.create(
@@ -39,6 +38,9 @@ class SnookerOrgRepository(context: Context) {
         }
 
         okHttpClient = OkHttpClient().newBuilder()
+                .readTimeout(30000L, TimeUnit.MILLISECONDS)
+                .connectTimeout(10000L, TimeUnit.MILLISECONDS)
+                .writeTimeout(10000L, TimeUnit.MILLISECONDS)
                 .addInterceptor { chain ->
                     chain.proceed(chain.request().newBuilder().cacheControl(CacheControl.FORCE_NETWORK).build())
                         .newBuilder().header("Cache-Control", "public, max-age=3600").build()
@@ -114,6 +116,13 @@ class SnookerOrgRepository(context: Context) {
     }
 
     fun player(id: Long) = async(CommonPool) {
-        Player(withService(true) { player(id) }.first())
+        val e = database.playerDao().findById(id)
+        if (e != null) {
+            e
+        } else {
+            val result = PlayerFromApi(withService(true) { player(id) }.first())
+            database.playerDao().add(PlayerEntity(id, result.name, result.nationality))
+            result
+        }
     }
 }
