@@ -13,7 +13,7 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
 
     fun rounds(): Deferred<Map<Long,String>> {
         if (rounds.isNotEmpty()) return async(Unconfined) { rounds }
-        val result = repository.rounds(data.ID, true)
+        val result = repository.rounds(data.ID)
         result.invokeOnCompletion { rounds = result.getCompleted() }
         return result
     }

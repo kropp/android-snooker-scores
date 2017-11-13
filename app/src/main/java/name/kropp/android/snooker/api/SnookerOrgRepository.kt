@@ -77,13 +77,18 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         }?.map { createMatch(it) } ?: emptyList()
     }
 
-    fun rounds(id: Long, cache: Boolean) = async(CommonPool) {
-        try {
-            withService { roundsOfEvent(id) }
-        } catch(e: Exception) {
-            Log.i(TAG, "Error retrieving rounds list for event $id", e)
-            null
-        }?.associate { it.Round to it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance*2-1})" else "" } ?: emptyMap()
+    fun rounds(id: Long) = async(CommonPool) {
+        val rounds = database.eventsDao().rounds(id)
+        if (rounds.isNotEmpty()) {
+            rounds
+        } else {
+            try {
+                withService { roundsOfEvent(id) }
+            } catch (e: Exception) {
+                Log.i(TAG, "Error retrieving rounds list for event $id", e)
+                null
+            }?.map { Round(it.Round, id, it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance * 2 - 1})" else "") } ?: emptyList()
+        }.associate { it.id to it.description }
     }
 
     private suspend fun createMatch(it: MatchData): Match {

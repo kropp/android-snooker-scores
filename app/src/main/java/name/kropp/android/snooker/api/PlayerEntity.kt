@@ -10,3 +10,10 @@ data class PlayerEntity(
         override var name: String,
         override var nationality: String
 ) : Player
+
+@Entity(tableName = "rounds")
+data class Round(
+        @PrimaryKey var id: Long,
+        var eventId: Long,
+        var description: String
+)
