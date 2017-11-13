@@ -2,7 +2,7 @@ package name.kropp.android.snooker.api
 
 import android.arch.persistence.room.*
 
-@Database(entities = arrayOf(PlayerEntity::class, Round::class), version = 1, exportSchema = false)
+@Database(entities = arrayOf(PlayerEntity::class, Round::class), version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun playerDao(): PlayerDao
     abstract fun eventsDao(): EventsDao

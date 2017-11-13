@@ -1,10 +1,18 @@
 package name.kropp.android.snooker
 
+import android.content.Context
+import android.text.format.DateUtils
 import android.util.Log
+import name.kropp.android.snooker.api.Event
 import java.text.SimpleDateFormat
 
 
 val YMDDateFormat = SimpleDateFormat("yyyy-MM-dd")
+
+
+fun formatEventDates(event: Event, context: Context): String =
+        DateUtils.formatDateRange(context, event.startDate.time, event.endDate.time, DateUtils.FORMAT_SHOW_DATE)
+
 
 fun flagResource(country: String) = when(country) {
     "Australia" -> R.drawable.au
@@ -21,7 +29,8 @@ fun flagResource(country: String) = when(country) {
     "India" -> R.drawable.`in`
     "Iran" -> R.drawable.ir
     "Ireland" -> R.drawable.ie
-    "Israel" -> R.drawable.`is`
+    "Iceland" -> R.drawable.`is`
+    "Israel" -> R.drawable.il
     "Malaysia" -> R.drawable.my
     "Malta" -> R.drawable.mt
     "Northern Ireland" -> R.drawable.gb_nir

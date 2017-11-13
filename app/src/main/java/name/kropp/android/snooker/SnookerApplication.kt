@@ -11,5 +11,5 @@ import android.arch.persistence.room.Room
 class SnookerApplication : Application() {
     val repository by lazy { SnookerOrgRepository(this, database) }
 
-    val database by lazy { Room.databaseBuilder(applicationContext, AppDatabase::class.java, "snooker").build() }
+    val database by lazy { Room.databaseBuilder(applicationContext, AppDatabase::class.java, "snooker").fallbackToDestructiveMigration().build() }
 }

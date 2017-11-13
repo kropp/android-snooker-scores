@@ -31,9 +31,6 @@ class MainActivity : AppCompatActivity() {
     private val application: SnookerApplication
         get() = getApplication() as SnookerApplication
 
-    private val longDateFormat = DateFormat.getLongDateFormat(this)
-    private val yearFormat = SimpleDateFormat("YYYY", Locale.getDefault())
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -44,9 +41,6 @@ class MainActivity : AppCompatActivity() {
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
-        // show data from cache immediately
-        update(id, true)
-        // and request update to show as soon as it is ready
         update(id)
 
         pager.setOnTouchListener { view, event ->
@@ -71,9 +65,10 @@ class MainActivity : AppCompatActivity() {
 
                 event_location.text = event.location
                 event_location_flag.setImageResource(flagResource(event.country))
-                event_dates.text = "${longDateFormat.format(event.startDate)} — ${longDateFormat.format(event.endDate)}"
+                event_dates.text = formatEventDates(event, this@MainActivity)
 
-                toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
+                //toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
+                event_name.text = event.name
 
                 val r = event.rounds()
                 val allMatches = event.matches(cache)
