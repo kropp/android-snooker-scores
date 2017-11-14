@@ -42,7 +42,9 @@ fun flagResource(country: String) = when(country) {
     "Thailand" -> R.drawable.th
     "Wales" -> R.drawable.gb_wls
     else -> {
-        Log.i("flag", "No flag for $country")
+        if (country.isNotEmpty()) {
+            Log.i("flag", "No flag for $country")
+        }
         R.drawable.unknown
     }
 }

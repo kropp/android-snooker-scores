@@ -75,7 +75,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         try {
             withService { matchesOfEvent(id) }
         } catch(e: Exception) {
-            Log.i(TAG, "Error retrieving matches list for event $id", e)
+            Log.i(TAG, "Error retrieving matches list for event $id: ${e.message}")
             null
         }?.map { createMatch(it) } ?: emptyList()
     }
@@ -84,7 +84,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         try {
             withService { ongoingMatches() }
         } catch(e: Exception) {
-            Log.i(TAG, "Error retrieving ongoing matches list", e)
+            Log.i(TAG, "Error retrieving ongoing matches list: ${e.message}")
             null
         }?.map { createMatch(it) } ?: emptyList()
     }
@@ -97,7 +97,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             try {
                 withService { roundsOfEvent(id) }
             } catch (e: Exception) {
-                Log.i(TAG, "Error retrieving rounds list for event $id", e)
+                Log.i(TAG, "Error retrieving rounds list for event $id: ${e.message}")
                 null
             }?.map { Round(it.Round, id, it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance * 2 - 1})" else "") } ?: emptyList()
         }.associate { it.id to it.description }

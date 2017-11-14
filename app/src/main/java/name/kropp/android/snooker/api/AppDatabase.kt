@@ -22,7 +22,7 @@ interface EventsDao {
     @Query("SELECT * from rounds where eventId = :eventId")
     fun rounds(eventId: Long): List<Round>
 
-    @Query("SELECT * from events where Season = :year")
+    @Query("SELECT * from events where Season = :year ORDER BY StartDate")
     fun events(year: Long): List<EventData>
 
     @Query("SELECT * from events where ID = :eventId")
