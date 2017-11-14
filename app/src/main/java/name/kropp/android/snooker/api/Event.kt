@@ -13,15 +13,15 @@ class Event(private val data: EventData, private val repository: SnookerOrgRepos
 
     fun rounds(): Deferred<Map<Long,String>> {
         if (rounds.isNotEmpty()) return async(Unconfined) { rounds }
-        val result = repository.rounds(data.ID)
+        val result = repository.rounds(id)
         result.invokeOnCompletion { rounds = result.getCompleted() }
         return result
     }
 
-    suspend fun ongoingMatches(cache: Boolean) = repository.ongoingMatches(cache).await().filter { it.eventId == data.ID }
+    suspend fun ongoingMatches(cache: Boolean) = repository.ongoingMatches(cache).await().filter { it.eventId == id }
 
     fun matches(cache: Boolean): Deferred<List<Match>> {
-        val result = repository.matches(data.ID, cache)
+        val result = repository.matches(id, cache)
         result.invokeOnCompletion { matches = result.getCompleted() }
         return result
     }

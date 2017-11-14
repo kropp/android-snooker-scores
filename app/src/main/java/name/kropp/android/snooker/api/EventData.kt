@@ -1,10 +1,13 @@
 package name.kropp.android.snooker.api
 
+import android.arch.persistence.room.Entity
+import android.arch.persistence.room.PrimaryKey
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@Entity(tableName = "events")
 data class EventData(
-        val ID: Long,
+        @PrimaryKey val ID: Long,
         val Name: String,
         val StartDate: String,
         val EndDate: String,

@@ -53,9 +53,21 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             .addConverterFactory(jacksonFactory)
             .build().create(SnookerOrgApi::class.java)
 
-    suspend fun events(cache: Boolean) = withService { events() }.map { Event(it, this@SnookerOrgRepository) }
+    suspend fun events(): List<Event> {
+        val result = database.eventsDao().events(2017)
+        return if (result.any()) {
+            result
+        } else {
+            val events = withService { events() }
+            database.eventsDao().insert(events)
+            events
+        }.map { Event(it, this@SnookerOrgRepository) }
+    }
 
-    suspend fun event(id: Long, cache: Boolean) = Event(withService { event(id) }.first(), this@SnookerOrgRepository)
+    suspend fun event(id: Long): Event {
+        val event = database.eventsDao().event(id) ?: withService { event(id) }.first()
+        return Event(event, this@SnookerOrgRepository)
+    }
 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
