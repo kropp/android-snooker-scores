@@ -61,7 +61,7 @@ class MainActivity : AppCompatActivity() {
     private fun update(id: Long, cache: Boolean = false) {
         launch(UI) {
             try {
-                event = run(CommonPool) { application.repository.event(id, cache) }
+                event = run(CommonPool) { application.repository.event(id) }
 
                 event_location.text = event.location
                 event_location_flag.setImageResource(flagResource(event.country))

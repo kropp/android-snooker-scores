@@ -41,7 +41,6 @@
             app:expandedTitleTextAppearance="@color/textColor"
             app:collapsedTitleTextAppearance="@color/textColor"
             >
-
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -56,6 +55,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:paddingTop="@dimen/padding"
+                    android:paddingBottom="@dimen/padding"
                     android:baselineAligned="true"
                     android:orientation="horizontal">
                     <TextView
@@ -74,9 +74,9 @@
                 </LinearLayout>
                 <TextView
                     android:id="@+id/event_dates"
+                    android:transitionName="eventDates"
                     android:textSize="@dimen/textSmallSize"
                     android:textColor="@color/textColor"
-                    android:paddingTop="@dimen/padding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
@@ -85,7 +85,18 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin" />
+                app:layout_collapseMode="pin">
+
+                <TextView
+                    android:id="@+id/event_name"
+                    android:transitionName="eventName"
+                    android:textSize="@dimen/textHeaderSize"
+                    android:textColor="@color/textColor"
+                    android:paddingTop="@dimen/padding"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+            </android.support.v7.widget.Toolbar>
 
         </android.support.design.widget.CollapsingToolbarLayout>
 

@@ -11,8 +11,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val longDateFormat = DateFormat.getLongDateFormat(activity)
-
     var events = listOf<Event>()
 
     override fun getItemCount() = events.size
@@ -25,7 +23,7 @@ class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Ada
 
             holder.flag.setImageResource(flagResource(event.country))
             holder.text.text = event.name
-            holder.aux.text = "${longDateFormat.format(event.startDate)} — ${longDateFormat.format(event.endDate)}"
+            holder.aux.text = formatEventDates(event, activity)
         }
     }
 

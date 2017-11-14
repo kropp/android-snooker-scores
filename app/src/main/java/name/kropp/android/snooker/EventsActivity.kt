@@ -1,12 +1,16 @@
 package name.kropp.android.snooker
 
+import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.text.format.DateFormat
 import android.util.Log
+import android.util.Pair
+import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -17,6 +21,7 @@ import name.kropp.android.snooker.api.Event
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import java.text.SimpleDateFormat
+import java.time.Duration
 import java.util.*
 
 class EventsActivity : AppCompatActivity() {
@@ -26,9 +31,6 @@ class EventsActivity : AppCompatActivity() {
 
     private val application: SnookerApplication
         get() = getApplication() as SnookerApplication
-
-    private val longDateFormat = DateFormat.getLongDateFormat(this)
-    private val yearFormat = SimpleDateFormat("YYYY", Locale.getDefault())
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,8 +54,8 @@ class EventsActivity : AppCompatActivity() {
     private fun update(cache: Boolean = false) {
         launch(UI) {
             try {
-                events = run(CommonPool) { application.repository.events(cache) }
-                eventsAdapter.events = events.filterNot(Event::isQualifying).filter { it.endDate >= Date() }
+                events = run(CommonPool) { application.repository.events() }
+                eventsAdapter.events = events.filterNot(Event::isQualifying).filter { it.endDate >= Date().apply { date-- } }
                 eventsAdapter.notifyDataSetChanged()
             } catch (e: UnknownHostException) {
                 showOfflineSnackbar()
@@ -76,9 +78,10 @@ class EventsActivity : AppCompatActivity() {
                 }.show()
     }
 
-    fun onEventClicked(event: Event) {
+    fun onEventClicked(event: Event, eventNameView: View, eventDatesView: View) {
         val intent = Intent(this, MainActivity::class.java)
         intent.putExtra("id", event.id)
-        startActivity(intent)
+        val sceneTransitionAnimation = ActivityOptions.makeSceneTransitionAnimation(this, Pair(eventNameView, "eventName"), Pair(eventDatesView, "eventDates"))
+        startActivity(intent, sceneTransitionAnimation.toBundle())
     }
 }
