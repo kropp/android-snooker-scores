@@ -21,5 +21,5 @@ class Match(private val data: MatchData, val player1: Player, val player2: Playe
     val isPlayer2Winner: Boolean
         get() = data.WinnerID == data.Player2ID
     val eventId: Long get() = data.EventID
-    val worldSnookerId: Long get() = data.WorldSnookerID
+    val liveUrl get() = data.LiveUrl
 }

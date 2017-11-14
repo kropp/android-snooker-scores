@@ -26,7 +26,7 @@ interface EventsDao {
     fun events(year: Long): List<EventData>
 
     @Query("SELECT * from events where ID = :eventId")
-    fun event(eventId: Long): EventData
+    fun event(eventId: Long): EventData?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(event: EventData)

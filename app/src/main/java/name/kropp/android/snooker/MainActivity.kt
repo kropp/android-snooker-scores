@@ -104,10 +104,10 @@ class MainActivity : AppCompatActivity() {
 //        val intent = Intent(this, MatchActivity::class.java)
 //        intent.putExtra("id", match.id)
         //startActivity(intent)
-        val url = "http://livescores.worldsnookerdata.com/Matches/LiveScoring/${event.worldSnookerId}/${match.worldSnookerId}"
+//        val url = "http://livescores.worldsnookerdata.com/Matches/LiveScoring/${event.worldSnookerId}/${match.worldSnookerId}"
         val customTabsIntent = CustomTabsIntent.Builder().apply {
             setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimaryDark))
         }.build()
-        customTabsIntent.launchUrl(this, Uri.parse(url))
+        customTabsIntent.launchUrl(this, Uri.parse(match.liveUrl))
     }
 }
