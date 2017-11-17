@@ -72,12 +72,20 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
-        try {
+        val result = if (cache) {
+            database.matchesDao().matchesOfEvent(id).map { createMatch(it) }
+        } else emptyList()
+
+        if (result.isNotEmpty()) result
+        else try {
             withService { matchesOfEvent(id) }
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving matches list for event $id: ${e.message}")
             null
-        }?.map { createMatch(it) } ?: emptyList()
+        }?.map {
+            database.matchesDao().insert(it)
+            createMatch(it)
+        } ?: emptyList()
     }
 
     fun ongoingMatches(cache: Boolean) = async(CommonPool) {
@@ -86,7 +94,10 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving ongoing matches list: ${e.message}")
             null
-        }?.map { createMatch(it) } ?: emptyList()
+        }?.map {
+            database.matchesDao().insert(it)
+            createMatch(it)
+        } ?: emptyList()
     }
 
     fun rounds(id: Long) = async(CommonPool) {

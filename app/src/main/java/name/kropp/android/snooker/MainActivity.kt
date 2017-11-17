@@ -41,7 +41,7 @@ class MainActivity : AppCompatActivity() {
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
 
-        update(id)
+        update(id, true)
 
         pager.setOnTouchListener { view, event ->
             swipe.isEnabled = event.action == MotionEvent.ACTION_UP
