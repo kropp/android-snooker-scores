@@ -2,7 +2,7 @@ package name.kropp.android.snooker.api
 
 import android.arch.persistence.room.*
 
-@Database(version = 4, exportSchema = false, entities = arrayOf(
+@Database(version = 5, exportSchema = false, entities = arrayOf(
         PlayerEntity::class,
         Round::class,
         EventData::class,

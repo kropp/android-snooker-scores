@@ -1,6 +1,5 @@
 package name.kropp.android.snooker
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
 import android.text.format.DateFormat
 import android.view.LayoutInflater
@@ -10,7 +9,6 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-    private val dateFormat = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd"), Locale.getDefault())
     val MATCH = 1001
     val ROUND = 1002
 
@@ -35,34 +33,9 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
     override fun getItemCount() = matchesByRound.values.sumBy { it.size + 1 }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is MatchViewHolder) {
-            val match = matchAt(position)!!
-            holder.match = match
-
-            holder.view.setBackgroundResource(if (position % 2 == 0) R.color.colorPrimaryDark else R.color.colorPrimary)
-
-            if (match.isStarted || match.isFinished) {
-                holder.aux1.text = match.score1.toString()
-                holder.aux2.text = match.score2.toString()
-            } else {
-                holder.aux1.text = dateFormat.format(match.date)
-                holder.aux2.text = ""
-            }
-
-            val normalOrFade1 = ContextCompat.getColor(holder.view.context, if (match.isPlayer2Winner) R.color.colorPrimaryLight else R.color.textColor)
-            holder.text1.setTextColor(normalOrFade1)
-            holder.aux1.setTextColor(if (match.isActive) ContextCompat.getColor(holder.view.context, R.color.colorAccent) else normalOrFade1)
-            val normalOrFade2 = ContextCompat.getColor(holder.view.context, if (match.isPlayer1Winner) R.color.colorPrimaryLight else R.color.textColor)
-            holder.text2.setTextColor(normalOrFade2)
-            holder.aux2.setTextColor(if (match.isActive) ContextCompat.getColor(holder.view.context, R.color.colorAccent) else normalOrFade2)
-
-            holder.flag1.setImageResource(flagResource(match.player1.nationality))
-            holder.text1.text = match.player1.name
-
-            holder.flag2.setImageResource(flagResource(match.player2.nationality))
-            holder.text2.text = match.player2.name
-        } else if (holder is RoundViewHolder) {
-            holder.text.text = roundAt(position)
+        when (holder) {
+            is MatchViewHolder -> holder.bind(matchAt(position))
+            is RoundViewHolder -> holder.bind(roundAt(position))
         }
     }
 
@@ -103,8 +76,9 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
         return null
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = if (viewType == MATCH)
-            MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
-        else
-            RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
+        MATCH -> MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
+        ROUND -> RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
+        else -> null
+    }
 }

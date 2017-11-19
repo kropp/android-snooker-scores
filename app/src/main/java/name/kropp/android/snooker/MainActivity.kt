@@ -40,6 +40,7 @@ class MainActivity : AppCompatActivity() {
         tabLayout.setupWithViewPager(pager)
         pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
         pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
+        pager.currentItem = 1
 
         update(id, true)
 
