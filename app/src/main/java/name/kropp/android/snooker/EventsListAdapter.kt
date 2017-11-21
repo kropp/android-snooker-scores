@@ -1,32 +1,71 @@
 package name.kropp.android.snooker
 
-import android.support.v4.content.ContextCompat
 import android.support.v7.widget.RecyclerView
-import android.text.format.DateFormat
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import name.kropp.android.snooker.api.Event
 import name.kropp.android.snooker.api.Match
-import java.text.SimpleDateFormat
 import java.util.*
 
 class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     var events = listOf<Event>()
 
-    override fun getItemCount() = events.size
+    private var ongoingMatchesByRound = sortedMapOf<Long, List<Match>>()
+    private var rounds = emptyMap<Long, String>()
+
+    private var liveMatchesCount = 0
+
+    fun setOngoingMatches(ongoingMatchesByRound: SortedMap<Long, List<Match>>, rounds: Map<Long,String>) {
+        this.ongoingMatchesByRound = ongoingMatchesByRound
+        this.rounds = rounds
+        liveMatchesCount = ongoingMatchesByRound.values.sumBy { it.size + 1 }
+    }
+
+    override fun getItemCount() = events.size + liveMatchesCount
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is EventViewHolder) {
-            val event = events[position]
-
-            holder.event = event
-
-            holder.flag.setImageResource(flagResource(event.country))
-            holder.text.text = event.name
-            holder.aux.text = formatEventDates(event, activity)
+        when (holder) {
+            is EventViewHolder -> holder.bind(events[position - liveMatchesCount])
+            is MatchViewHolder -> holder.bind(matchAt(position))
+            is RoundViewHolder -> holder.bind(roundAt(position))
         }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
-            EventViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.events_list_item, parent, false))
+    fun matchAt(position: Int): Match? {
+        var pos = position
+        for (matches in ongoingMatchesByRound.values) {
+            pos -= 1
+            if (pos < matches.size) {
+                return matches[pos]
+            }
+            pos -= matches.size
+        }
+        return null
+    }
+
+    fun roundAt(position: Int): String? {
+        var pos = position
+        for ((key, value) in ongoingMatchesByRound) {
+            if (pos == 0) {
+                return rounds[key]
+            }
+            pos -= (value.size + 1)
+        }
+        return null
+    }
+
+
+    override fun getItemViewType(position: Int) =
+        if (position >= liveMatchesCount) {
+            EVENT_VIEWTYPE
+        } else {
+            getItemViewType(ongoingMatchesByRound, position)
+        }
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when(viewType) {
+        MATCH_VIEWTYPE -> MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
+        ROUND_VIEWTYPE -> RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
+        EVENT_VIEWTYPE -> EventViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.events_list_item, parent, false))
+        else -> null
+    }
 }

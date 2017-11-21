@@ -105,12 +105,14 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         if (rounds.isNotEmpty()) {
             rounds
         } else {
-            try {
+            val rounds = try {
                 withService { roundsOfEvent(id) }
             } catch (e: Exception) {
                 Log.i(TAG, "Error retrieving rounds list for event $id: ${e.message}")
                 null
             }?.map { Round(it.Round, id, it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance * 2 - 1})" else "") } ?: emptyList()
+            rounds.forEach { database.eventsDao().insert(it) }
+            rounds
         }.associate { it.id to it.description }
     }
 

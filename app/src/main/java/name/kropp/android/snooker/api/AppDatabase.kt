@@ -29,11 +29,17 @@ interface EventsDao {
     @Query("SELECT * from rounds where eventId = :eventId")
     fun rounds(eventId: Long): List<Round>
 
+    @Query("SELECT * from rounds where ID = :id")
+    fun round(id: Long): Round
+
     @Query("SELECT * from events where Season = :year ORDER BY StartDate")
     fun events(year: Long): List<EventData>
 
     @Query("SELECT * from events where ID = :eventId")
     fun event(eventId: Long): EventData?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(rounds: Round)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(event: EventData)

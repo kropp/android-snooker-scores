@@ -1,5 +1,6 @@
 package name.kropp.android.snooker
 
+import android.app.Activity
 import android.support.v4.content.ContextCompat
 import android.support.v7.widget.AppCompatImageView
 import android.support.v7.widget.RecyclerView
@@ -12,7 +13,7 @@ import java.util.*
 
 private val dateFormat = SimpleDateFormat(DateFormat.getBestDateTimePattern(Locale.getDefault(), "MMMMd"), Locale.getDefault())
 
-class MatchViewHolder(val activity: MainActivity, val view: View): RecyclerView.ViewHolder(view) {
+class MatchViewHolder(val activity: Activity, val view: View): RecyclerView.ViewHolder(view) {
     val flag1 = view.findViewById<AppCompatImageView>(R.id.flag1)
     val text1 = view.findViewById<TextView>(android.R.id.text1)
     val aux1 = view.findViewById<TextView>(R.id.aux1)
@@ -24,9 +25,9 @@ class MatchViewHolder(val activity: MainActivity, val view: View): RecyclerView.
     var match: Match? = null
 
     init {
-        view.setOnClickListener {
-            match?.let { activity.onMatchClicked(it) }
-        }
+//        view.setOnClickListener {
+//            match?.let { activity.onMatchClicked(it) }
+//        }
     }
 
     fun bind(match: Match?) {

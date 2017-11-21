@@ -76,9 +76,9 @@ class MainActivity : AppCompatActivity() {
                 val liveMatches = event.ongoingMatches(cache)
                 r.await()
 
-                liveMatchesListAdapter.setEvent(liveMatches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, event.rounds, true)
+                liveMatchesListAdapter.setEvent(matchesByRound(liveMatches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, true), event.rounds)
                 liveMatchesListAdapter.notifyDataSetChanged()
-                allMatchesListAdapter.setEvent(allMatches.await(), event.rounds, false)
+                allMatchesListAdapter.setEvent(matchesByRound(allMatches.await(), false), event.rounds)
                 allMatchesListAdapter.notifyDataSetChanged()
             } catch (e: UnknownHostException) {
                 showOfflineSnackbar()

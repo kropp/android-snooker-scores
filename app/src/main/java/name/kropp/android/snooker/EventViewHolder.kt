@@ -18,4 +18,12 @@ class EventViewHolder(val activity: EventsActivity, val view: View): RecyclerVie
             event?.let { activity.onEventClicked(it, text, aux) }
         }
     }
+
+    fun bind(event: Event) {
+        this.event = event
+
+        flag.setImageResource(flagResource(event.country))
+        text.text = event.name
+        aux.text = formatEventDates(event, activity)
+    }
 }

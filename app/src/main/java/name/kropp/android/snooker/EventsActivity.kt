@@ -15,6 +15,7 @@ import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_events.*
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.android.UI
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.run
 import name.kropp.android.snooker.api.Event
@@ -54,8 +55,15 @@ class EventsActivity : AppCompatActivity() {
     private fun update(cache: Boolean = false) {
         launch(UI) {
             try {
+                val ongoingMatches = application.repository.ongoingMatches(false)
                 events = run(CommonPool) { application.repository.events() }
                 eventsAdapter.events = events.filterNot(Event::isQualifying).filter { it.endDate >= Date().apply { date-- } }
+                val ongoingMatchesByRound = matchesByRound(ongoingMatches.await(), true)
+//                val ongoingMatchesByRound = matchesByRound(application.repository.matches(628, false).await().take(5), true)
+                val rounds = ongoingMatchesByRound.keys.distinct()
+                        .mapNotNull { run(CommonPool) { application.database.eventsDao().round(it) to application.database.eventsDao().event(ongoingMatchesByRound[it]!!.first().eventId)!! } }
+                        .associateBy({it.first.id}, { "${it.second.Name} · ${it.first.description}" })
+                eventsAdapter.setOngoingMatches(ongoingMatchesByRound, /*ongoingMatchesByRound.keys.associateBy({it}, {"Live"})*/ rounds)
                 eventsAdapter.notifyDataSetChanged()
             } catch (e: UnknownHostException) {
                 showOfflineSnackbar()
