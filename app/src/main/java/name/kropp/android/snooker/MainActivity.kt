@@ -37,17 +37,14 @@ class MainActivity : AppCompatActivity() {
 
         val id = intent.getLongExtra("id", 537)
 
-        tabLayout.setupWithViewPager(pager)
-        pager.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabLayout))
-        pager.adapter = EventPagesAdapter(this, supportFragmentManager, liveMatchesListAdapter, allMatchesListAdapter)
-        pager.currentItem = 1
+
+
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.mathes_frame, MatchesListFragment(allMatchesListAdapter))
+        transaction.commit()
 
         update(id, true)
 
-        pager.setOnTouchListener { view, event ->
-            swipe.isEnabled = event.action == MotionEvent.ACTION_UP
-            false
-        }
         app_bar_layout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             swipe.isEnabled = verticalOffset <= 0
         }
