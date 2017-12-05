@@ -43,6 +43,10 @@ class MainActivity : AppCompatActivity() {
         transaction.replace(R.id.mathes_frame, MatchesListFragment(allMatchesListAdapter))
         transaction.commit()
 
+        setSupportActionBar(toolbar)
+        supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+
+
         update(id, true)
 
         app_bar_layout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
@@ -50,7 +54,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         swipe.setColorSchemeResources(R.color.colorPrimaryDark, R.color.colorPrimaryLight)
-        swipe.setDistanceToTriggerSync(20)
+        swipe.setDistanceToTriggerSync(200)
         swipe.setOnRefreshListener {
             update(id)
         }
@@ -61,19 +65,26 @@ class MainActivity : AppCompatActivity() {
             try {
                 event = run(CommonPool) { application.repository.event(id) }
 
+/*
                 event_location.text = event.location
                 event_location_flag.setImageResource(flagResource(event.country))
                 event_dates.text = formatEventDates(event, this@MainActivity)
+*/
 
-                //toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
+//                toolbar.title = "${event.name} ${yearFormat.format(event.endDate)}"
+                supportActionBar!!.title = event.name
+                supportActionBar!!.subtitle = formatEventDates(event, this@MainActivity)
+/*
                 event_name.text = event.name
+*/
 
                 val r = event.rounds()
                 val allMatches = event.matches(cache)
                 val liveMatches = event.ongoingMatches(cache)
                 r.await()
 
-                liveMatchesListAdapter.setEvent(matchesByRound(liveMatches.filter { it.isStarted || (it.date <= Date() && !it.isFinished) }, true), event.rounds)
+                liveMatchesListAdapter.setEvent(matchesByRound(liveMatches.filter { val date = it.date
+                    it.isStarted || (date != null && date <= Date() && !it.isFinished) }, true), event.rounds)
                 liveMatchesListAdapter.notifyDataSetChanged()
                 allMatchesListAdapter.setEvent(matchesByRound(allMatches.await(), false), event.rounds)
                 allMatchesListAdapter.notifyDataSetChanged()

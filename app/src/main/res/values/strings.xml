@@ -4,4 +4,5 @@
     <string name="tab_all">All Matches</string>
     <string name="no_connection">No connection</string>
     <string name="retry">Retry</string>
+    <string name="copyright">Data provided by snooker.org</string>
 </resources>

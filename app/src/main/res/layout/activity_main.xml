@@ -33,7 +33,7 @@
             android:id="@+id/collapsing_toolbar"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:layout_scrollFlags="scroll|enterAlways"
             app:contentScrim="?attr/colorPrimaryDark"
             app:expandedTitleMarginStart="@dimen/padding"
             app:expandedTitleMarginEnd="@dimen/padding"
@@ -41,6 +41,7 @@
             app:expandedTitleTextAppearance="@color/textColor"
             app:collapsedTitleTextAppearance="@color/textColor"
             >
+<!--
             <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -80,13 +81,35 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
             </LinearLayout>
+-->
+
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_collapseMode="pin"
+                app:titleTextColor="@color/textColor"
+                app:subtitleTextColor="@color/colorPrimaryLight"
+                android:background="@color/colorPrimaryDark"
+                app:contentInsetLeft="0dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp"
+                />
 
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:layout_collapseMode="pin">
+                android:layout_height="wrap_content"
+                app:layout_collapseMode="pin"
+                app:titleTextColor="@color/textColor"
+                app:subtitleTextColor="@color/colorPrimaryLight"
+                android:background="@color/colorPrimaryDark"
+                app:contentInsetLeft="0dp"
+                app:contentInsetStart="0dp"
+                app:contentInsetStartWithNavigation="0dp"
+                >
 
+<!--
                 <TextView
                     android:id="@+id/event_name"
                     android:transitionName="eventName"
@@ -95,6 +118,7 @@
                     android:paddingTop="@dimen/padding"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content" />
+-->
 
             </android.support.v7.widget.Toolbar>
 
