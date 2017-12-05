@@ -41,7 +41,7 @@ class MatchViewHolder(val activity: Activity, val view: View): RecyclerView.View
             aux1.text = match.score1.toString()
             aux2.text = match.score2.toString()
         } else {
-            aux1.text = dateFormat.format(match.date)
+            aux1.text = match.date?.let { dateFormat.format(it) } ?: ""
             aux2.text = ""
         }
 

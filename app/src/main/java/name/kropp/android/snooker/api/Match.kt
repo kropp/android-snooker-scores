@@ -8,7 +8,7 @@ class Match(private val data: MatchData, val player1: Player, val player2: Playe
     val score1 get() = data.Score1
     val score2 get() = data.Score2
     val round get() = data.Round
-    val date: Date
+    val date: Date?
         get() = data.ScheduledDate
     val isStarted: Boolean
         get() = data.Unfinished

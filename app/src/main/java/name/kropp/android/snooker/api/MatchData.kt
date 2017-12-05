@@ -37,7 +37,7 @@ data class MatchData(
         val ModDate: Date,
 //    val StartDate: Date,
 //    val EndDate: Date,
-        var ScheduledDate: Date,
+        var ScheduledDate: Date?,
         val FrameScores: String,
         val Sessions: String,
         val Note: String,
