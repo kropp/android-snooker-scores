@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="textSize">20sp</dimen>
-    <dimen name="flagHeight">21sp</dimen>
-    <dimen name="flagWidth">28sp</dimen>
-    <dimen name="flagSpacing">36sp</dimen>
-    <dimen name="padding">8dp</dimen>
+    <dimen name="textSize">18sp</dimen>
+    <dimen name="flagHeight">18sp</dimen>
+    <dimen name="flagWidth">24sp</dimen>
+    <dimen name="flagSpacing">32sp</dimen>
+    <dimen name="padding">6dp</dimen>
     <dimen name="textHeaderSize">32sp</dimen>
     <dimen name="textSmallSize">16sp</dimen>
     <dimen name="flagSmallHeight">12sp</dimen>
