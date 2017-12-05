@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlin-kapt'
 
 buildscript {
-    ext.kotlin_version = '1.1.60'
+    ext.kotlin_version = '1.2.0'
 
     repositories {
         jcenter()
@@ -54,13 +54,12 @@ kotlin {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
     androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     compile "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
-    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.19.3"
+    compile "org.jetbrains.kotlinx:kotlinx-coroutines-android:0.20"
 
     compile 'com.android.support:appcompat-v7:26.1.0'
     compile 'com.android.support:recyclerview-v7:26.1.0'
@@ -71,11 +70,15 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.2.0'
     compile 'com.squareup.retrofit2:converter-jackson:2.2.0'
     compile 'com.squareup.okhttp3:logging-interceptor:3.6.0'
-    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.8.7'
+    compile 'com.fasterxml.jackson.module:jackson-module-kotlin:2.9.2'
 
     implementation "android.arch.persistence.room:runtime:1.0.0"
     annotationProcessor "android.arch.persistence.room:compiler:1.0.0"
     kapt "android.arch.persistence.room:compiler:1.0.0"
 
+    implementation "android.arch.lifecycle:extensions:1.0.0"
+
+
     testCompile 'junit:junit:4.12'
+    testImplementation "android.arch.core:core-testing:1.0.0"
 }
