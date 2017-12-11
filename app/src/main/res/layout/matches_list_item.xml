@@ -7,12 +7,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding"
+        android:paddingTop="@dimen/padding"
+        android:paddingBottom="@dimen/paddingSmall"
+        android:paddingStart="@dimen/padding"
+        android:paddingEnd="@dimen/padding"
         >
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/flag1"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="@dimen/paddingSmall"
             android:layout_width="@dimen/flagWidth"
             android:layout_height="@dimen/flagHeight" />
         <TextView
@@ -34,12 +37,15 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="@dimen/padding"
+        android:paddingTop="@dimen/paddingSmall"
+        android:paddingBottom="@dimen/padding"
+        android:paddingStart="@dimen/padding"
+        android:paddingEnd="@dimen/padding"
         >
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/flag2"
-            android:layout_alignParentStart="true"
-            android:layout_centerVertical="true"
+            android:layout_alignParentTop="true"
+            android:layout_marginTop="@dimen/paddingSmall"
             android:layout_width="@dimen/flagWidth"
             android:layout_height="@dimen/flagHeight" />
         <TextView
