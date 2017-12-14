@@ -7,11 +7,11 @@ import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Call
-import retrofit2.Retrofit
+import retrofit2.*
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.File
 import java.io.IOException
@@ -22,15 +22,17 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
 
     private val jacksonFactory = JacksonConverterFactory.create(
             jacksonObjectMapper()
-            .enable(JsonParser.Feature.IGNORE_UNDEFINED)
-            .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true))
+                    .enable(JsonParser.Feature.IGNORE_UNDEFINED)
+                    .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true))
 
     private val okHttpClient: OkHttpClient
+    private val service: SnookerOrgApi
+
 
     init {
         val cache = try {
             Cache(File(context.cacheDir, "responses"), 10 * 1024 * 1024)
-        } catch(e: IOException) {
+        } catch (e: IOException) {
             Log.i(TAG, "Failed to created HTTP cache", e)
             null
         }
@@ -41,36 +43,32 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
                 .writeTimeout(10000L, TimeUnit.MILLISECONDS)
                 .addNetworkInterceptor(HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BASIC))
                 .cache(cache).build()
+
+        service = Retrofit.Builder()
+                .client(okHttpClient)
+                .baseUrl("http://api.snooker.org/")
+                .addConverterFactory(jacksonFactory)
+                .build().create(SnookerOrgApi::class.java)
     }
-
-    private val service by lazy { createRetrofitService(okHttpClient) }
-
-    private fun <R> withService(call: SnookerOrgApi.() -> Call<R>) = service.call().execute().body()
-
-    private fun createRetrofitService(client: OkHttpClient) = Retrofit.Builder()
-            .client(client)
-            .baseUrl("http://api.snooker.org/")
-            .addConverterFactory(jacksonFactory)
-            .build().create(SnookerOrgApi::class.java)
 
     suspend fun events(): List<Event> {
         val result = database.eventsDao().events(2017)
         return if (result.any()) {
             result
         } else {
-            val events = withService { events() }
+            val events = service.events().await()
             database.eventsDao().insert(events)
             events
         }.map { Event(it) }
     }
 
     suspend fun eventFast(id: Long) = async {
-        val event = database.eventsDao().event(id) ?: withService { event(id) }.first()
+        val event = database.eventsDao().event(id) ?: service.event(id).await().first()
         EventComplete(event, database.matchesDao().matchesOfEvent(id).map { createMatch(it) }, database.eventsDao().rounds(id).associate { it.id to it.description })
     }
 
     suspend fun event(id: Long) = async {
-        val event = database.eventsDao().event(id) ?: withService { event(id) }.first()
+        val event = database.eventsDao().event(id) ?: service.event(id).await().first()
 
         val rounds = rounds(id)
         val matches = matches(id, false)
@@ -78,7 +76,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         EventComplete(event, matches.await(), rounds.await())
     }
 
-    suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
+    suspend fun match(id: Long) = service.match(id).await() //.map { Match(it, this) }.sortedBy { it.date }
 
     fun matches(id: Long, cache: Boolean) = async(CommonPool) {
         val result = if (cache) {
@@ -87,11 +85,11 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
 
         if (result.isNotEmpty()) result
         else try {
-            val matches = withService { matchesOfEvent(id) }
+            val matches = service.matchesOfEvent(id).await()
             database.matchesDao().removeMatchesOfEvent(id)
             database.matchesDao().insert(matches)
             matches
-        } catch(e: Exception) {
+        } catch (e: Exception) {
             Log.i(TAG, "Error retrieving matches list for event $id: ${e.message}")
             null
         }?.map {
@@ -100,10 +98,10 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         } ?: emptyList()
     }
 
-    fun ongoingMatches(cache: Boolean) = async(CommonPool) {
+    fun ongoingMatches(cache: Boolean) = async {
         try {
-            withService { ongoingMatches() }
-        } catch(e: Exception) {
+            service.ongoingMatches().await()
+        } catch (e: Exception) {
             Log.i(TAG, "Error retrieving ongoing matches list: ${e.message}")
             null
         }?.map {
@@ -118,7 +116,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             rounds
         } else {
             val rounds = try {
-                withService { roundsOfEvent(id) }
+                service.roundsOfEvent(id).await()
             } catch (e: Exception) {
                 Log.i(TAG, "Error retrieving rounds list for event $id: ${e.message}")
                 null
@@ -142,9 +140,25 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         if (e != null) {
             e
         } else {
-            val result = PlayerFromApi(withService { player(id) }.first())
+            val result = PlayerFromApi(service.player(id).await().first())
             database.playerDao().add(PlayerEntity(id, result.name, result.nationality))
             result
         }
     }
+}
+
+suspend fun <T> Call<T>.await() = suspendCancellableCoroutine<T> { continuation ->
+    enqueue(object : Callback<T> {
+        override fun onFailure(call: Call<T>, t: Throwable) {
+            continuation.tryResumeWithException(t)?.let(continuation::completeResume)
+        }
+
+        override fun onResponse(call: Call<T>, response: Response<T>) {
+            if (response.isSuccessful) {
+                continuation.tryResume(response.body())?.let(continuation::completeResume)
+            } else {
+                continuation.tryResumeWithException(HttpException(response))?.let(continuation::completeResume)
+            }
+        }
+    })
 }
