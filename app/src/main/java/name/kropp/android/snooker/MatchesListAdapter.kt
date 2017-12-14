@@ -6,7 +6,9 @@ import android.view.ViewGroup
 import name.kropp.android.snooker.api.Match
 import java.util.*
 
-fun matchesByRound(matches: List<Match>, reorder: Boolean): SortedMap<Long, List<Match>> {
+typealias MatchesByRound = SortedMap<Long, List<Match>>
+
+fun matchesByRound(matches: List<Match>, reorder: Boolean): MatchesByRound {
     return matches.groupBy { it.round }
             .map {
                 it.key to it.value.sortedBy {
