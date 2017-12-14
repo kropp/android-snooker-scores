@@ -1,5 +1,6 @@
 package name.kropp.android.snooker
 
+import android.arch.lifecycle.ViewModelProviders
 import android.content.Intent
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -10,10 +11,6 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_events.*
-import kotlinx.coroutines.experimental.CommonPool
-import kotlinx.coroutines.experimental.android.UI
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.run
 import name.kropp.android.snooker.api.Event
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -21,12 +18,7 @@ import java.util.*
 
 
 class EventsActivity : AppCompatActivity() {
-    private lateinit var events: List<Event>
-
     private val eventsAdapter = EventsListAdapter(this)
-
-    private val application: SnookerApplication
-        get() = getApplication() as SnookerApplication
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,29 +46,30 @@ class EventsActivity : AppCompatActivity() {
     }
 
     private fun update(cache: Boolean = false) {
-        launch(UI) {
-            try {
-                val ongoingMatches = application.repository.ongoingMatches(false)
-                events = run(CommonPool) { application.repository.events() }
-                eventsAdapter.events = events.filterNot(Event::isQualifying).filter { it.endDate >= Date().apply { date-- } }
-                val ongoingMatchesByRound = matchesByRound(ongoingMatches.await(), true)
-//                val ongoingMatchesByRound = matchesByRound(application.repository.matches(628, false).await().take(5), true)
-                val rounds = ongoingMatchesByRound.keys.distinct()
-                        .mapNotNull { run(CommonPool) { application.database.eventsDao().round(it) to application.database.eventsDao().event(ongoingMatchesByRound[it]!!.first().eventId)!! } }
-                        .associateBy({it.first.id}, { "${it.second.Name} · ${it.first.description}" })
-                eventsAdapter.setOngoingMatches(ongoingMatchesByRound, /*ongoingMatchesByRound.keys.associateBy({it}, {"Live"})*/ rounds)
+        try {
+            val eventsLive = ViewModelProviders.of(this).get(EventsViewModel::class.java).live()
+            eventsLive.observe({lifecycle}) {
+                eventsAdapter.events = it!!.filterNot(Event::isQualifying).filter { it.endDate >= Date().apply { date-- } }
                 eventsAdapter.notifyDataSetChanged()
-            } catch (e: UnknownHostException) {
-                showOfflineSnackbar()
-            } catch (e: SocketTimeoutException) {
-                showOfflineSnackbar()
-            } catch (e: Throwable) {
-                Log.d("main", "Failed to update", e)
-                Toast.makeText(this@EventsActivity, "Unknown error: ${e.message}", Toast.LENGTH_LONG).show()
             }
 
-            swipe.isRefreshing = false
+            val matchesLive = ViewModelProviders.of(this).get(OngoingMatchesViewModel::class.java).live()
+            matchesLive.observe({lifecycle}) {
+                val ongoingMatchesByRound = matchesByRound(it!!.first, true)
+                eventsAdapter.setOngoingMatches(ongoingMatchesByRound, it.second)
+                eventsAdapter.notifyDataSetChanged()
+            }
+
+        } catch (e: UnknownHostException) {
+            showOfflineSnackbar()
+        } catch (e: SocketTimeoutException) {
+            showOfflineSnackbar()
+        } catch (e: Throwable) {
+            Log.d("main", "Failed to update", e)
+            Toast.makeText(this@EventsActivity, "Unknown error: ${e.message}", Toast.LENGTH_LONG).show()
         }
+
+        swipe.isRefreshing = false
     }
 
     private fun showOfflineSnackbar() {

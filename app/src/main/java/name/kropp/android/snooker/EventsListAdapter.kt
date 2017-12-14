@@ -15,7 +15,7 @@ class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Ada
 
     private var liveMatchesCount = 0
 
-    fun setOngoingMatches(ongoingMatchesByRound: SortedMap<Long, List<Match>>, rounds: Map<Long,String>) {
+    fun setOngoingMatches(ongoingMatchesByRound: SortedMap<Long, List<Match>>, rounds: Map<Long, String>) {
         this.ongoingMatchesByRound = ongoingMatchesByRound
         this.rounds = rounds
         liveMatchesCount = ongoingMatchesByRound.values.sumBy { it.size + 1 }
@@ -25,9 +25,9 @@ class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Ada
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
-            is EventViewHolder -> holder.bind(events[position - liveMatchesCount])
-            is MatchViewHolder -> holder.bind(matchAt(position))
-            is RoundViewHolder -> holder.bind(roundAt(position))
+            is EventViewHolder -> holder.bind(events[if (position == 0) 0 else position - liveMatchesCount])
+            is MatchViewHolder -> holder.bind(matchAt(position-1))
+            is RoundViewHolder -> holder.bind(roundAt(position-1))
         }
     }
 
@@ -55,14 +55,13 @@ class EventsListAdapter(private val activity: EventsActivity) : RecyclerView.Ada
     }
 
 
-    override fun getItemViewType(position: Int) =
-        if (position >= liveMatchesCount) {
-            EVENT_VIEWTYPE
-        } else {
-            getItemViewType(ongoingMatchesByRound, position)
-        }
+    override fun getItemViewType(position: Int) = when {
+        position == 0 -> EVENT_VIEWTYPE
+        position >= liveMatchesCount+1 -> EVENT_VIEWTYPE
+        else -> getItemViewType(ongoingMatchesByRound, position-1)
+    }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when(viewType) {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         MATCH_VIEWTYPE -> MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
         ROUND_VIEWTYPE -> RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
         EVENT_VIEWTYPE -> EventViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.events_list_item, parent, false))
