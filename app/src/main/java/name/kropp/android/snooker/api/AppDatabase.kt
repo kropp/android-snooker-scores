@@ -56,6 +56,12 @@ interface MatchesDao {
     @Query("SELECT * from matches where EventID = :eventId")
     fun matchesOfEvent(eventId: Long): List<MatchData>
 
+    @Query("DELETE from matches where EventID = :eventId")
+    fun removeMatchesOfEvent(eventId: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(match: MatchData)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun insert(matches: List<MatchData>)
 }

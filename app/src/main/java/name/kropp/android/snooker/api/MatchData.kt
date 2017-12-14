@@ -11,7 +11,7 @@ import java.util.*
 data class MatchData(
         @PrimaryKey
         val ID: Long,
-        @ForeignKey(entity = EventData::class, parentColumns = arrayOf("ID"), childColumns =  arrayOf("EventID"), onDelete = ForeignKey.CASCADE)
+        @ForeignKey(entity = EventData::class, parentColumns = ["ID"], childColumns = ["EventID"], onDelete = ForeignKey.CASCADE)
         val EventID: Long,
         val Round: Long,
         val Number: Long,

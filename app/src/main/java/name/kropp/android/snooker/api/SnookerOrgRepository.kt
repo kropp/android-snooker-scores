@@ -61,12 +61,21 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             val events = withService { events() }
             database.eventsDao().insert(events)
             events
-        }.map { Event(it, this@SnookerOrgRepository) }
+        }.map { Event(it) }
     }
 
-    suspend fun event(id: Long): Event {
+    suspend fun eventFast(id: Long) = async {
         val event = database.eventsDao().event(id) ?: withService { event(id) }.first()
-        return Event(event, this@SnookerOrgRepository)
+        EventComplete(event, database.matchesDao().matchesOfEvent(id).map { createMatch(it) }, database.eventsDao().rounds(id).associate { it.id to it.description })
+    }
+
+    suspend fun event(id: Long) = async {
+        val event = database.eventsDao().event(id) ?: withService { event(id) }.first()
+
+        val rounds = rounds(id)
+        val matches = matches(id, false)
+
+        EventComplete(event, matches.await(), rounds.await())
     }
 
     suspend fun match(id: Long) = service.match(id).execute().body()//.map { Match(it, this) }.sortedBy { it.date }
@@ -78,7 +87,10 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
 
         if (result.isNotEmpty()) result
         else try {
-            withService { matchesOfEvent(id) }
+            val matches = withService { matchesOfEvent(id) }
+            database.matchesDao().removeMatchesOfEvent(id)
+            database.matchesDao().insert(matches)
+            matches
         } catch(e: Exception) {
             Log.i(TAG, "Error retrieving matches list for event $id: ${e.message}")
             null
@@ -110,11 +122,14 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             } catch (e: Exception) {
                 Log.i(TAG, "Error retrieving rounds list for event $id: ${e.message}")
                 null
-            }?.map { Round(it.Round, id, it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance * 2 - 1})" else "") } ?: emptyList()
+            }?.map { createRound(it) } ?: emptyList()
             rounds.forEach { database.eventsDao().insert(it) }
             rounds
         }.associate { it.id to it.description }
     }
+
+    private fun createRound(it: RoundData) =
+            Round(it.Round, it.EventID, it.RoundName + if (it.Distance > 0) " (Best of ${it.Distance * 2 - 1})" else "")
 
     private suspend fun createMatch(it: MatchData): Match {
         val player1 = player(it.Player1ID)
