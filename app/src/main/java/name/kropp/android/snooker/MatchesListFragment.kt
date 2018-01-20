@@ -15,7 +15,7 @@ class MatchesListFragment : Fragment() {
 
         val matches_list = view.findViewById<RecyclerView>(R.id.matches_list)
 
-        val matchesListAdapter = MatchesListAdapter(activity as MainActivity)
+        val matchesListAdapter = MatchesListAdapter(activity as EventActivity)
 
         val eventViewModel = ViewModelProviders.of(activity).get(EventViewModel::class.java)
         eventViewModel.live().observe({lifecycle}) { event ->

@@ -27,6 +27,8 @@ fun matchesByRound(matches: List<Match>, reorder: Boolean): MatchesByRound {
 val MATCH_VIEWTYPE = 1001
 val ROUND_VIEWTYPE = 1002
 val EVENT_VIEWTYPE = 1003
+val ROUND_LIVE_VIEWTYPE = 1004
+val NO_VIEWTYPE = 1999
 
 fun getItemViewType(matchesByRound: SortedMap<Long, List<Match>>, position: Int): Int {
     var pos = position
@@ -42,7 +44,7 @@ fun getItemViewType(matchesByRound: SortedMap<Long, List<Match>>, position: Int)
     return 0
 }
 
-class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MatchesListAdapter(private val activity: EventActivity) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     private var matchesByRound = sortedMapOf<Long,List<Match>>()
     private var rounds = mapOf<Long,String>()
 
@@ -88,6 +90,7 @@ class MatchesListAdapter(private val activity: MainActivity) : RecyclerView.Adap
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = when (viewType) {
         MATCH_VIEWTYPE -> MatchViewHolder(activity, LayoutInflater.from(parent.context).inflate(R.layout.matches_list_item, parent, false))
         ROUND_VIEWTYPE -> RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round, parent, false))
+        ROUND_LIVE_VIEWTYPE -> RoundViewHolder(LayoutInflater.from(parent.context).inflate(R.layout.matches_list_round_live, parent, false))
         else -> null
     }
 }

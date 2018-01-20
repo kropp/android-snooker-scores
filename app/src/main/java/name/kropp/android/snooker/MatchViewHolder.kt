@@ -35,7 +35,7 @@ class MatchViewHolder(val activity: Activity, val view: View): RecyclerView.View
 
         if (match == null) return
 
-        view.setBackgroundResource(if (position % 2 == 0) R.color.colorPrimaryDark else R.color.colorPrimary)
+        view.setBackgroundResource(if (match.isActive) R.color.colorPrimary else R.color.colorPrimaryDark)
 
         if (match.isStarted || match.isFinished) {
             aux1.text = match.score1.toString()
@@ -58,6 +58,8 @@ class MatchViewHolder(val activity: Activity, val view: View): RecyclerView.View
         flag2.setImageResource(flagResource(match.player2.nationality))
         text2.text = match.player2.name
 
+
+//        view.startAnimation(AnimationUtils.loadAnimation(activity, R.anim.slide_in_top))
     }
 }
 
@@ -66,5 +68,6 @@ class RoundViewHolder(val view: View): RecyclerView.ViewHolder(view) {
 
     fun bind(round: String?) {
         text.text = round
+//        view.startAnimation(AnimationUtils.loadAnimation(view.context, R.anim.slide_in_top))
     }
 }

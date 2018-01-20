@@ -2,8 +2,9 @@
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@android:id/text1"
     android:padding="@dimen/padding"
-    android:background="@color/colorPrimaryLight"
+    android:background="@color/colorPrimaryDark"
     android:textColor="@color/textColor"
     android:textSize="@dimen/textSmallSize"
+    android:textAllCaps="true"
     android:layout_width="fill_parent"
     android:layout_height="wrap_content" />
