@@ -5,13 +5,13 @@ import android.util.Log
 import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.MapperFeature
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.experimental.CoroutineCallAdapterFactory
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.suspendCancellableCoroutine
 import okhttp3.Cache
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.*
+import retrofit2.Retrofit
 import retrofit2.converter.jackson.JacksonConverterFactory
 import java.io.File
 import java.io.IOException
@@ -47,6 +47,7 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         service = Retrofit.Builder()
                 .client(okHttpClient)
                 .baseUrl("http://api.snooker.org/")
+                .addCallAdapterFactory(CoroutineCallAdapterFactory())
                 .addConverterFactory(jacksonFactory)
                 .build().create(SnookerOrgApi::class.java)
     }
@@ -133,20 +134,4 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             result
         }
     }
-}
-
-suspend fun <T> Call<T>.await() = suspendCancellableCoroutine<T> { continuation ->
-    enqueue(object : Callback<T> {
-        override fun onFailure(call: Call<T>, t: Throwable) {
-            continuation.tryResumeWithException(t)?.let(continuation::completeResume)
-        }
-
-        override fun onResponse(call: Call<T>, response: Response<T>) {
-            if (response.isSuccessful) {
-                continuation.tryResume(response.body())?.let(continuation::completeResume)
-            } else {
-                continuation.tryResumeWithException(HttpException(response))?.let(continuation::completeResume)
-            }
-        }
-    })
 }
