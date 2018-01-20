@@ -2,12 +2,7 @@ package name.kropp.android.snooker.api
 
 import android.arch.persistence.room.*
 
-@Database(version = 5, exportSchema = false, entities = arrayOf(
-        PlayerEntity::class,
-        Round::class,
-        EventData::class,
-        MatchData::class
-))
+@Database(version = 6, exportSchema = false, entities = [PlayerEntity::class, Round::class, EventData::class, MatchData::class])
 @TypeConverters(DateConverters::class)
 abstract class AppDatabase : RoomDatabase() {
     abstract fun playerDao(): PlayerDao
@@ -18,7 +13,7 @@ abstract class AppDatabase : RoomDatabase() {
 @Dao
 interface PlayerDao {
     @Query("SELECT * from players where id = :id")
-    fun findById(id: Long) : PlayerEntity
+    fun findById(id: Long) : PlayerEntity?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun add(playerEntity: PlayerEntity)

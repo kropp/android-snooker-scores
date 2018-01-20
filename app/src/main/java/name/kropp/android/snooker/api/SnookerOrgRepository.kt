@@ -51,12 +51,12 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
                 .build().create(SnookerOrgApi::class.java)
     }
 
-    suspend fun events(): List<Event> {
-        val result = database.eventsDao().events(2017)
+    suspend fun events(year: Long = 2017): List<Event> {
+        val result = database.eventsDao().events(year)
         return if (result.any()) {
             result
         } else {
-            val events = service.events().await()
+            val events = service.events(year).await()
             database.eventsDao().insert(events)
             events
         }.map { Event(it) }
@@ -71,22 +71,16 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         val event = database.eventsDao().event(id) ?: service.event(id).await().first()
 
         val rounds = rounds(id)
-        val matches = matches(id, false)
+        val matches = matches(id)
 
         EventComplete(event, matches.await(), rounds.await())
     }
 
     suspend fun match(id: Long) = service.match(id).await() //.map { Match(it, this) }.sortedBy { it.date }
 
-    fun matches(id: Long, cache: Boolean) = async(CommonPool) {
-        val result = if (cache) {
-            database.matchesDao().matchesOfEvent(id).map { createMatch(it) }
-        } else emptyList()
-
-        if (result.isNotEmpty()) result
-        else try {
+    fun matches(id: Long) = async {
+        try {
             val matches = service.matchesOfEvent(id).await()
-            database.matchesDao().removeMatchesOfEvent(id)
             database.matchesDao().insert(matches)
             matches
         } catch (e: Exception) {
@@ -98,16 +92,10 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
         } ?: emptyList()
     }
 
-    fun ongoingMatches(cache: Boolean) = async {
-        try {
-            service.ongoingMatches().await()
-        } catch (e: Exception) {
-            Log.i(TAG, "Error retrieving ongoing matches list: ${e.message}")
-            null
-        }?.map {
-            database.matchesDao().insert(it)
-            createMatch(it)
-        } ?: emptyList()
+    fun ongoingMatches() = async {
+        val ongoingMatches = service.ongoingMatches().await()
+        database.matchesDao().insert(ongoingMatches)
+        ongoingMatches.map { createMatch(it) }
     }
 
     fun rounds(id: Long) = async(CommonPool) {
@@ -132,10 +120,10 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
     private suspend fun createMatch(it: MatchData): Match {
         val player1 = player(it.Player1ID)
         val player2 = player(it.Player2ID)
-        return Match(it, player1.await(), player2.await(), this@SnookerOrgRepository)
+        return Match(it, player1.await(), player2.await())
     }
 
-    fun player(id: Long) = async(CommonPool) {
+    fun player(id: Long) = async {
         val e = database.playerDao().findById(id)
         if (e != null) {
             e

@@ -2,14 +2,12 @@ package name.kropp.android.snooker.api
 
 import android.arch.persistence.room.Entity
 import android.arch.persistence.room.ForeignKey
-import android.arch.persistence.room.PrimaryKey
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.util.*
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-@Entity(tableName = "matches")
+@Entity(tableName = "matches", primaryKeys = ["EventID", "Round", "Player1ID", "Player2ID"])
 data class MatchData(
-        @PrimaryKey
         val ID: Long,
         @ForeignKey(entity = EventData::class, parentColumns = ["ID"], childColumns = ["EventID"], onDelete = ForeignKey.CASCADE)
         val EventID: Long,

@@ -2,7 +2,7 @@ package name.kropp.android.snooker.api
 
 import java.util.*
 
-class Match(private val data: MatchData, val player1: Player, val player2: Player, private val repository: SnookerOrgRepository) {
+class Match(private val data: MatchData, val player1: Player, val player2: Player) {
     val id get() = data.ID
     val number get() = data.Number
     val score1 get() = data.Score1
