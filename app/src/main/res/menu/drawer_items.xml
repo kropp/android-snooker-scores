@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/season2017"
+            android:title="@string/season2017" />
+        <item
+            android:id="@+id/season2016"
+            android:title="@string/season2016" />
+        <item
+            android:id="@+id/season2015"
+            android:title="@string/season2015" />
+        <item
+            android:id="@+id/season2014"
+            android:title="@string/season2014" />
+        <item
+            android:id="@+id/season2013"
+            android:title="@string/season2013" />
+    </group>
+    <item
+        android:id="@+id/rankings"
+        android:title="@string/rankings" />
+</menu>

@@ -7,17 +7,17 @@ import android.support.customtabs.CustomTabsIntent
 import android.support.design.widget.Snackbar
 import android.support.v4.content.ContextCompat
 import android.support.v7.app.AppCompatActivity
-import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.activity_event.*
 import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.launch
 import name.kropp.android.snooker.api.Match
 
-class MainActivity : AppCompatActivity() {
+class EventActivity : AppCompatActivity() {
     private val eventViewModel by lazy { ViewModelProviders.of(this).get(EventViewModel::class.java) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.activity_event)
 
         val id = intent.getLongExtra("id", 537)
 
@@ -30,11 +30,11 @@ class MainActivity : AppCompatActivity() {
 
         eventViewModel.live().observe({lifecycle}) { event ->
             supportActionBar!!.title = event!!.name
-            supportActionBar!!.subtitle = formatEventDates(event, this@MainActivity)
+            supportActionBar!!.subtitle = formatEventDates(event, this@EventActivity)
         }
 
 
-        update(id, true)
+        update(id)
 
         app_bar_layout.addOnOffsetChangedListener { appBarLayout, verticalOffset ->
             swipe.isEnabled = verticalOffset <= 0
@@ -47,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun update(id: Long, cache: Boolean = false) {
+    private fun update(id: Long) {
         launch(UI) {
 /*
             try {
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
         //startActivity(intent)
 //        val url = "http://livescores.worldsnookerdata.com/Matches/LiveScoring/${event.worldSnookerId}/${match.worldSnookerId}"
         val customTabsIntent = CustomTabsIntent.Builder().apply {
-            setToolbarColor(ContextCompat.getColor(this@MainActivity, R.color.colorPrimaryDark))
+            setToolbarColor(ContextCompat.getColor(this@EventActivity, R.color.colorPrimaryDark))
         }.build()
         customTabsIntent.launchUrl(this, Uri.parse(match.liveUrl))
     }

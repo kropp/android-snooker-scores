@@ -1,8 +1,14 @@
 <resources>
     <string name="app_name">Snooker Scores</string>
-    <string name="tab_live">Live</string>
     <string name="tab_all">All Matches</string>
     <string name="no_connection">No connection</string>
     <string name="retry">Retry</string>
-    <string name="copyright">Data provided by snooker.org</string>
+    <string name="copyright">Data provided by\nsnooker.org</string>
+    <string name="round_live">Live</string>
+    <string name="season2017">2017/2018</string>
+    <string name="season2016">2016/2017</string>
+    <string name="season2015">2015/2016</string>
+    <string name="season2014">2014/2015</string>
+    <string name="season2013">2013/2014</string>
+    <string name="rankings">Rankings</string>
 </resources>
