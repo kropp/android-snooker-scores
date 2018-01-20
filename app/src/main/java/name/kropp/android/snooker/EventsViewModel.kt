@@ -7,23 +7,17 @@ import kotlinx.coroutines.experimental.android.UI
 import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.launch
 import name.kropp.android.snooker.api.Event
+import kotlin.properties.Delegates
 
 
 class EventsViewModel(application: Application) : AndroidViewModel(application) {
-    private lateinit var events: MutableLiveData<List<Event>>
+    val events = MutableLiveData<List<Event>>()
 
-    fun live(): MutableLiveData<List<Event>> {
-        if (!::events.isInitialized) {
-            events = MutableLiveData()
+    var year by Delegates.observable(2017L) { _, _, _ -> refresh() }
 
-            refresh()
-        }
-        return events
-    }
-
-    private fun refresh() {
+    fun refresh() {
         launch(UI) {
-            events.value = async { getApplication<SnookerApplication>().repository.events() }.await()
+            events.value = async { getApplication<SnookerApplication>().repository.events(year) }.await()
         }
     }
 }
