@@ -6,6 +6,7 @@
     <dimen name="flagSpacing">32sp</dimen>
     <dimen name="padding">8dp</dimen>
     <dimen name="paddingSmall">2dp</dimen>
+    <dimen name="paddingMedium">4dp</dimen>
     <dimen name="textHeaderSize">32sp</dimen>
     <dimen name="textSmallSize">16sp</dimen>
     <dimen name="flagSmallHeight">12sp</dimen>
