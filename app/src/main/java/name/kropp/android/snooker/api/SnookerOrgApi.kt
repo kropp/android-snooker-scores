@@ -25,4 +25,7 @@ interface SnookerOrgApi {
 
     @GET("/")
     fun match(id: Long): Deferred<Match>
+
+    @GET("/")
+    fun rankings(@Query("rt") rankingType: String = "MoneyRankings", @Query("s") season: Long = 2017): Deferred<List<RankingData>>
 }

@@ -134,4 +134,8 @@ class SnookerOrgRepository(context: Context, private val database: AppDatabase) 
             result
         }
     }
+
+    fun rankings() = async {
+        service.rankings().await().sortedBy { it.Position }.map { player(it.PlayerID).await() to it.Sum }
+    }
 }
